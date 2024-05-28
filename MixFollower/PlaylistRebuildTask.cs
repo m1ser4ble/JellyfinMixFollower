@@ -8,6 +8,7 @@ namespace Jellyfin.Plugin.MixFollower
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Emby.Naming.Common;
@@ -47,6 +48,13 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger = logger;
             this.localization = localization;
             this.logger.LogInformation("PlaylistRebuildTask constructed");
+
+            var assembly = Assembly.GetExecutingAssembly();
+            string[] resourceNames = assembly.GetManifestResourceNames();
+            foreach (string resource_name in resourceNames)
+            {
+                logger.LogInformation("containing res {Xes}", resource_name);
+            }
         }
 
         /// <inheritdoc />
