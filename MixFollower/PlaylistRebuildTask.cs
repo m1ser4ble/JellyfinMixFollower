@@ -89,6 +89,10 @@ namespace Jellyfin.Plugin.MixFollower
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
             this.logger.LogInformation("ExecuteAsync");
+
+            var apis_download = Plugin.Instance.Configuration.apis_download;
+            var commands_to_fetch = Plugin.Instance.Configuration.commands_to_fetch;
+
             const string PLAYLIST_NAME = "TOAST";
             var firstAdminId = this.userManager.Users
                 .First(i => i.HasPermission(PermissionKind.IsAdministrator)).Id;

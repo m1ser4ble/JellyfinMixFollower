@@ -28,8 +28,8 @@
                         </label>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="AString">A String</label>
-                        <input id="AString" name="AString" type="text" is="emby-input" />
+                        <label class="inputLabel inputLabelUnfocused" for="CommandsToDownload">A String</label>
+                        <input id="CommandsToDownload" name="CommandsToDownload" type="text" is="emby-input" />
                         <div class="fieldDescription">Another Description</div>
                     </div>
                     <div>
@@ -49,10 +49,8 @@
                 .addEventListener('pageshow', function() {
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
-                        document.querySelector('#Options').value = config.Options;
-                        document.querySelector('#AnInteger').value = config.AnInteger;
-                        document.querySelector('#TrueFalseSetting').checked = config.TrueFalseSetting;
-                        document.querySelector('#AString').value = config.AString;
+                        
+                        document.querySelector('#CommandsToDownload').value = config.CommandsToDownload[0];
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -61,10 +59,7 @@
                 .addEventListener('submit', function(e) {
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
-                    config.Options = document.querySelector('#Options').value;
-                    config.AnInteger = document.querySelector('#AnInteger').value;
-                    config.TrueFalseSetting = document.querySelector('#TrueFalseSetting').checked;
-                    config.AString = document.querySelector('#AString').value;
+                    config.CommandsToDownload = document.querySelector('#CommandsToDownload').value;
                     ApiClient.updatePluginConfiguration(TemplateConfig.pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);
                     });

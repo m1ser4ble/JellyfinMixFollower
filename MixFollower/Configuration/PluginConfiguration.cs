@@ -33,10 +33,8 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         // set default options here
-        this.Options = SomeOptions.AnotherOption;
-        this.TrueFalseSetting = true;
-        this.AnInteger = 2;
-        this.AString = "string";
+        this.ApisDownload =[string.Empty];
+        this.CommandsToFetch =[string.Empty];
     }
 
     /// <summary>
@@ -45,14 +43,15 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool TrueFalseSetting { get; set; }
 
     /// <summary>
-    /// Gets or sets an integer setting.
+    /// Gets or sets api for downloading missing songs in my library.
     /// </summary>
-    public int AnInteger { get; set; }
+    public List<string> ApisDownload { get; set; }
 
     /// <summary>
-    /// Gets or sets a string setting.
+    /// Gets or sets linux commands to fetch
+    /// e.g) python fetch_billboard.py.
     /// </summary>
-    public string AString { get; set; }
+    public List<string> CommandsToFetch { get; set; }
 
     /// <summary>
     /// Gets or sets an enum option.
