@@ -90,8 +90,8 @@ namespace Jellyfin.Plugin.MixFollower
         {
             this.logger.LogInformation("ExecuteAsync");
 
-            var apis_download = Plugin.Instance.Configuration.apis_download;
-            var commands_to_fetch = Plugin.Instance.Configuration.commands_to_fetch;
+            var apis_download = Plugin.Instance.Configuration.ApisDownload;
+            var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
 
             const string PLAYLIST_NAME = "TOAST";
             var firstAdminId = this.userManager.Users
