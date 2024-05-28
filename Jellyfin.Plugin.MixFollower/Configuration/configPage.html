@@ -5,17 +5,17 @@
     <title>MixFollower</title>
 </head>
 <body>
-    <div id="TemplateConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
+    <div id="configPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
         <div data-role="content">
             <div class="content-primary">
-                <form id="TemplateConfigForm">
-                    <div>
-                        <div class="inputContainer">
+                <form id="configForm">
+                    <div style="width: 100%;">
+                        <div class="inputContainer" style="width: 50%;">
                             <label class="inputLabel inputLabelUnfocused" for="CommandsToFetch">Commands to fetch songs from mix </label>
                             <input id="CommandsToFetch" name="CommandsToFetch" type="text" is="emby-input" />
                             <div class="fieldDescription">Another Description</div>
                         </div>
-                        <div class="inputContainer">
+                        <div class="inputContainer" style="width: 50%;">
                             <label class="inputLabel inputLabelUnfocused" for="PlaylistName">Playlist name in jellyfin</label>
                             <input id="PlaylistName" name="PlaylistName" type="text" is="emby-input" />
                             <div class="fieldDescription"></div>
@@ -34,7 +34,7 @@
                 pluginUniqueId: 'be9032e5-518d-4738-8a64-abe9e3c67ebd'
             };
 
-            document.querySelector('#TemplateConfigPage')
+            document.querySelector('#configPage')
                 .addEventListener('pageshow', function() {
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
@@ -44,7 +44,7 @@
                     });
                 });
 
-            document.querySelector('#TemplateConfigForm')
+            document.querySelector('#configForm')
                 .addEventListener('submit', function(e) {
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
