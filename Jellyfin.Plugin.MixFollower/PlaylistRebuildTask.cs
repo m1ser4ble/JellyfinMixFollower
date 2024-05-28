@@ -8,6 +8,7 @@ namespace Jellyfin.Plugin.MixFollower
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Emby.Naming.Common;
@@ -92,6 +93,8 @@ namespace Jellyfin.Plugin.MixFollower
 
             var apis_download = Plugin.Instance.Configuration.ApisDownload;
             var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
+
+            this.logger.LogInformation("commands_to_fetch : {0}", commands_to_fetch[0]);
 
             const string PLAYLIST_NAME = "TOAST";
             var firstAdminId = this.userManager.Users

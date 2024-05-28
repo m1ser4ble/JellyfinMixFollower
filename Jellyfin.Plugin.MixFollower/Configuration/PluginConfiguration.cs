@@ -34,7 +34,7 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         // set default options here
         this.ApisDownload =[string.Empty];
-        this.CommandsToFetch =[string.Empty];
+        this.CommandsToFetch =["on_testing"];
     }
 
     /// <summary>
