@@ -48,13 +48,6 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger = logger;
             this.localization = localization;
             this.logger.LogInformation("PlaylistRebuildTask constructed");
-
-            var assembly = Assembly.GetExecutingAssembly();
-            string[] resourceNames = assembly.GetManifestResourceNames();
-            foreach (string resource_name in resourceNames)
-            {
-                logger.LogInformation("containing res {Xes}", resource_name);
-            }
         }
 
         /// <inheritdoc />
@@ -100,6 +93,8 @@ namespace Jellyfin.Plugin.MixFollower
 
             var apis_download = Plugin.Instance.Configuration.ApisDownload;
             var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
+
+            this.logger.LogInformation("commands_to_fetch : {0}", commands_to_fetch[0]);
 
             const string PLAYLIST_NAME = "TOAST";
             var firstAdminId = this.userManager.Users
