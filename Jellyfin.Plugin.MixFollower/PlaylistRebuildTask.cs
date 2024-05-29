@@ -143,22 +143,12 @@ namespace Jellyfin.Plugin.MixFollower
                 var songs = obj.GetValue("songs");
 
                 var list_items = new List<Guid>();
-                foreach (var song in songs)
+                foreach (var song in songs.Children<JObject>())
                 {
-                    if (song["title"] is null)
-                    {
-                        this.logger.LogInformation("title not found");
-                        return;
-                    }
+                    this.logger.LogInformation("i am one of the song");
+                    var title = song.GetValue("title").ToString();
+                    var artist = song.GetValue("artist").ToString();
 
-                    var title = song["title"] !.ToString();
-                    if (song["artist"] is null)
-                    {
-                        this.logger.LogInformation("artist not found");
-                        return;
-                    }
-
-                    var artist = song["artist"] !.ToString();
                     var item = this.GetMostMatchedSong(title, artist);
                     if (item.Id == Guid.Empty)
                     {
