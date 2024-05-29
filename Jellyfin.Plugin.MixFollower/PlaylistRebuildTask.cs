@@ -125,17 +125,20 @@ namespace Jellyfin.Plugin.MixFollower
                 result = await Cli.Wrap(command).ExecuteBufferedAsync();
                 this.logger.LogInformation("result : {stdout}", result.StandardOutput);
                 JObject obj = JObject.Parse(result.StandardOutput);
-                if (obj["name"] is null)
+                var token = obj["name"];
+                if (token is null)
                 {
                     this.logger.LogInformation("name not found");
+                    return;
                 }
 
-                string playlist_name = obj["name"] !.ToString();
+                string playlist_name = token!.ToString();
 
                 var songs = obj["songs"];
                 if (songs is null)
                 {
                     this.logger.LogInformation("song not found");
+                    return;
                 }
 
                 var list_items = new List<Guid>();
@@ -144,12 +147,14 @@ namespace Jellyfin.Plugin.MixFollower
                     if (song["title"] is null)
                     {
                         this.logger.LogInformation("title not found");
+                        return;
                     }
 
                     var title = song["title"] !.ToString();
                     if (song["artist"] is null)
                     {
                         this.logger.LogInformation("artist not found");
+                        return;
                     }
 
                     var artist = song["artist"] !.ToString();
