@@ -136,14 +136,9 @@ namespace Jellyfin.Plugin.MixFollower
                     this.logger.LogInformation("prop: {pro}", prop.ToString());
                 }
 
-                var token = obj["name"];
-                if (token is null)
-                {
-                    this.logger.LogInformation("name not found");
-                    return;
-                }
-
-                string playlist_name = token!.ToString();
+                this.logger.LogInformation("do i have name key ? {tf}", obj.ContainsKey("name"));
+                string playlist_name = obj.GetValue("name").ToString();
+                this.logger.LogInformation("I will make playlist {d}", playlist_name);
 
                 var songs = obj["songs"];
                 if (songs is null)
