@@ -123,54 +123,68 @@ namespace Jellyfin.Plugin.MixFollower
             try
             {
                 result = await Cli.Wrap(command).ExecuteBufferedAsync();
-            }
-            catch (System.ComponentModel.Win32Exception exception)
-            {
-                this.logger.LogInformation("executing {command} gets crash! ", command, exception.Message);
-                return;
-            }
-
-            if (!result.IsSuccess)
-            {
-                throw new InvalidOperationException($"{command} failed! error code: {result.ExitCode}");
-            }
-
-            JObject obj = JObject.Parse(result.StandardOutput);
-            string playlist_name = obj["name"] !.ToString();
-            var songs = obj["songs"];
-            var list_items = new List<Guid>();
-            foreach (var song in songs)
-            {
-                var title = song["title"] !.ToString();
-                var artist = song["artist"] !.ToString();
-                var item = this.GetMostMatchedSong(title, artist);
-                if (item.Id == Guid.Empty)
+                JObject obj = JObject.Parse(result.StandardOutput);
+                if (obj["name"] is null)
                 {
-                    this.logger.LogInformation("song {Title} by {Artist} not found in library", title, artist);
-                    /*
-                    item = DownloadMusic();
-                    if(item == Guid.Empty)
-                    {
-                        throw new InvalidOperationException("");
-                    }*/
+                    this.logger.LogInformation("name not found");
                 }
 
-                list_items.Add(item.Id);
+                string playlist_name = obj["name"] !.ToString();
+
+                var songs = obj["songs"];
+                if (songs is null)
+                {
+                    this.logger.LogInformation("song not found");
+                }
+
+                var list_items = new List<Guid>();
+                foreach (var song in songs)
+                {
+                    if (song["title"] is null)
+                    {
+                        this.logger.LogInformation("title not found");
+                    }
+
+                    var title = song["title"] !.ToString();
+                    if (song["artist"] is null)
+                    {
+                        this.logger.LogInformation("artist not found");
+                    }
+
+                    var artist = song["artist"] !.ToString();
+                    var item = this.GetMostMatchedSong(title, artist);
+                    if (item.Id == Guid.Empty)
+                    {
+                        this.logger.LogInformation("song {Title} by {Artist} not found in library", title, artist);
+                        /*
+                        item = DownloadMusic();
+                        if(item == Guid.Empty)
+                        {
+                            throw new InvalidOperationException("");
+                        }*/
+                    }
+
+                    list_items.Add(item.Id);
+                }
+
+                this.DeletePlaylist(playlist_name);
+
+                var playlist = await this.playlistManager.CreatePlaylist(new PlaylistCreationRequest
+                {
+                    Name = playlist_name,
+                    ItemIdList = list_items,
+                    UserId = user,
+                    MediaType = Data.Enums.MediaType.Audio,
+
+                    // Users = [],
+                    Public = true,
+                }).ConfigureAwait(false);
+                this.logger.LogInformation("playlist created {Id}", playlist.Id);
             }
-
-            this.DeletePlaylist(playlist_name);
-
-            var playlist = await this.playlistManager.CreatePlaylist(new PlaylistCreationRequest
+            catch (Exception exception)
             {
-                Name = playlist_name,
-                ItemIdList = list_items,
-                UserId = user,
-                MediaType = Data.Enums.MediaType.Audio,
-
-                // Users = [],
-                Public = true,
-            }).ConfigureAwait(false);
-            this.logger.LogInformation("playlist created {Id}", playlist.Id);
+                this.logger.LogInformation("executing {command} gets crash! ", command, exception.Message);
+            }
         }
 
         private Audio ConvertSearchHintInfoToAudio(SearchHintInfo hintInfo)
@@ -232,7 +246,7 @@ namespace Jellyfin.Plugin.MixFollower
 
             var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
 
-            this.logger.LogInformation("commands_to_fetch : {0}", commands_to_fetch[0]);
+            this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
 
             commands_to_fetch.ForEach(command => this.CreatePlaylistFromFetchCommand(this.firstAdminId, command));
         }
