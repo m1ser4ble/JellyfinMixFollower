@@ -116,7 +116,7 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger.LogInformation("matched and deleted ");
         }
 
-        private async Task<Guid> CreatePlaylistFromFetchCommand(Guid user, string command)
+        private async Task<string> CreatePlaylistFromFetchCommand(Guid user, string command)
         {
             this.logger.LogInformation("cli command executing {Command}", command);
             CliWrap.Buffered.BufferedCommandResult? result = null;
@@ -186,7 +186,7 @@ namespace Jellyfin.Plugin.MixFollower
                 this.logger.LogInformation("{stack_trace}", exception.StackTrace.ToString());
             }
 
-            return Guid.Empty;
+            return string.Empty;
         }
 
         private Audio ConvertSearchHintInfoToAudio(SearchHintInfo hintInfo)
