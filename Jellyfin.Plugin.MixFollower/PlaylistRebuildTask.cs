@@ -124,7 +124,7 @@ namespace Jellyfin.Plugin.MixFollower
             {
                 result = await Cli.Wrap(command).ExecuteBufferedAsync();
                 this.logger.LogInformation("result : {stdout}", result.StandardOutput);
-                string json = result.StandardOutput;
+                string json = result.StandardOutput.ToString();
                 JObject obj = JObject.Parse(json);
                 var token = obj["name"];
                 if (token is null)
