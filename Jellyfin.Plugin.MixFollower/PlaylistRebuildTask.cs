@@ -140,12 +140,7 @@ namespace Jellyfin.Plugin.MixFollower
                 string playlist_name = obj.GetValue("name").ToString();
                 this.logger.LogInformation("I will make playlist {d}", playlist_name);
 
-                var songs = obj["songs"];
-                if (songs is null)
-                {
-                    this.logger.LogInformation("song not found");
-                    return;
-                }
+                var songs = obj.GetValue("songs");
 
                 var list_items = new List<Guid>();
                 foreach (var song in songs)
