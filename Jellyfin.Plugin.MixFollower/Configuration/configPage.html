@@ -85,7 +85,7 @@
                         
                         document.querySelector('#CommandsToFetch').value = config.CommandsToFetch[0];
                         var component = document.querySelector('#CommandsToFetch');
-                        document.querySelector("command_container").append(component);
+                        //document.querySelector("command_container").append(component);
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -117,7 +117,7 @@
         // input 요소 생성
         var newInput = document.createElement("input");
         newInput.type = "text";
-        nexInput.is = "emby-input"
+        newInput.is = "emby-input"
         newInput.id = "input" + (document.querySelectorAll(".apiform").length + 1);
 
         // vertical 요소에 label과 input 추가
