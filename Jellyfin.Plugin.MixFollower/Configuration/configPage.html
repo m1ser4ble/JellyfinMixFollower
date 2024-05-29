@@ -88,7 +88,7 @@
                                 var src = document.querySelector("#cmd_clone_source");
                                 var target = src.cloneNode(true);
                                 target.id=src.id + index.toString();
-                                var input_element = target.getElementByTagName('input');
+                                var input_element = target.find('input');
                                 input_element.id = corresponding_id+index.toString();
                                 
                                 document.getElementById("command_container").insertBefore(target, document.getElementById("insert_point_cmd"));
