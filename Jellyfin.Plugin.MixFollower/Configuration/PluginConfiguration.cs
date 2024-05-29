@@ -33,8 +33,8 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         // set default options here
-        this.ApisDownload =[string.Empty];
-        this.CommandsToFetch =["on_testing"];
+        this.ApisDownload = new List<string>();
+        this.CommandsToFetch = new List<string>();
     }
 
     /// <summary>

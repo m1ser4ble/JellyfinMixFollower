@@ -9,43 +9,46 @@
         <div data-role="content">
             <div class="content-primary">
                 <form id="configForm">
-                    <div style="border: 2px solid green;">
+                    <div id="download_api_container" style="border: 2px solid green;">
                         <div class="inputContainer" >
                             <label class="inputLabel inputLabelUnfocused" for="DownloadApi">Download api for missing song in library </label>
                             <input id="DownloadApi" name="Download" type="text" is="emby-input" />
                             <div class="fieldDescription"></div>
                         </div>
-                    </div>
-                    <div>
-                        <button
-                            is="emby-button"
-                            id="AddDownloadApi"
-                            type="button"
-                            class="fab btnAddDownloadApi submit"
-                            title="${Add}"
-                        >
-                    <span class="material-icons add" aria-hidden="true"></span>
-                    <div style="border: 2px solid red;">
-                        <div class="inputContainer" >
-                            <label class="inputLabel inputLabelUnfocused" for="PlaylistName">Playlist name in jellyfin</label>
-                            <input id="PlaylistName" name="PlaylistName" type="text" is="emby-input" />
-                            <div class="fieldDescription"></div>
-                        </div>
-                        <div class="inputContainer" >
-                            <label class="inputLabel inputLabelUnfocused" for="CommandsToFetch">Commands to fetch songs from mix </label>
-                            <input id="CommandsToFetch" name="CommandsToFetch" type="text" is="emby-input" />
-                            <div class="fieldDescription"></div>
+                        <div>
+                            <button
+                                is="emby-button"
+                                id="AddDownloadApi"
+                                type="button"
+                                class="fab btnAddDownloadApi submit"
+                                title="${Add}"
+                            >
+                            <span class="material-icons add" aria-hidden="true"></span>
                         </div>
                     </div>
-                    <div>
-                        <button
-                            is="emby-button"
-                            id="AddCommand"
-                            type="button"
-                            class="fab btnAddCommand submit"
-                            title="${Add}"
-                        >
-                    <span class="material-icons add" aria-hidden="true"></span>
+                    <div id="command_container" style="border: 2px solid red;">
+                        <div>
+                            <div >
+                                <label class="inputLabel inputLabelUnfocused" for="PlaylistName">Playlist name in jellyfin</label>
+                                <input id="PlaylistName" name="PlaylistName" type="text" is="emby-input" />
+                                <div class="fieldDescription"></div>
+                            </div>
+                            <div >
+                                <label class="inputLabel inputLabelUnfocused" for="CommandsToFetch">Commands to fetch songs from mix </label>
+                                <input id="CommandsToFetch" name="CommandsToFetch" type="text" is="emby-input" />
+                                <div class="fieldDescription"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <button
+                                is="emby-button"
+                                id="AddCommand"
+                                type="button"
+                                class="fab btnAddCommand submit"
+                                title="${Add}"
+                            >
+                        <span class="material-icons add" aria-hidden="true"></span>
+                        </div>
                     </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
