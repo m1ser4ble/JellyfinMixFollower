@@ -123,6 +123,7 @@ namespace Jellyfin.Plugin.MixFollower
             try
             {
                 result = await Cli.Wrap(command).ExecuteBufferedAsync();
+                this.logger.LogInformation("result : {stdout}", result.StandardOutput);
                 JObject obj = JObject.Parse(result.StandardOutput);
                 if (obj["name"] is null)
                 {
@@ -183,7 +184,7 @@ namespace Jellyfin.Plugin.MixFollower
             }
             catch (Exception exception)
             {
-                this.logger.LogInformation("executing {command} gets crash! ", command, exception.Message);
+                this.logger.LogInformation("executing {command} gets crash! {msg} ", command, exception.Message);
             }
         }
 
