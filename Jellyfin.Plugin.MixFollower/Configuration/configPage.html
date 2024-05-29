@@ -87,7 +87,7 @@
                             if(index!=0){
                                 var src = document.querySelector("#cmd_clone_source");
                                 var target = src.cloneNode(true);
-                                target.id=src.id + str(index);
+                                target.id=src.id + index.toString();
                                 var input_element = target.getElementById(corresponding_id);
                                 input_element.id = corresponding_id+str(index);
                                 
