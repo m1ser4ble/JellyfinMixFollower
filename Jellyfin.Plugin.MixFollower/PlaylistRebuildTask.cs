@@ -126,8 +126,6 @@ namespace Jellyfin.Plugin.MixFollower
 
                 // result.ToString();
                 string json = result.StandardOutput.ToString();
-                string deepcopy = string.Empty;
-                json.CopyTo(deepcopy);
                 this.logger.LogInformation("result : {stdout}", json);
 
                 JObject obj = JObject.Parse(json);
