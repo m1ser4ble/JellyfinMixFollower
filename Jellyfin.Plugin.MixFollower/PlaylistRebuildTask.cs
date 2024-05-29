@@ -129,6 +129,13 @@ namespace Jellyfin.Plugin.MixFollower
                 this.logger.LogInformation("result : {stdout}", json);
 
                 JObject obj = JObject.Parse(json);
+                this.logger.LogInformation("parse success");
+
+                foreach (var prop in obj.Properties())
+                {
+                    this.logger.LogInformation("prop: {pro}", prop.ToString());
+                }
+
                 var token = obj["name"];
                 if (token is null)
                 {
@@ -194,7 +201,7 @@ namespace Jellyfin.Plugin.MixFollower
             catch (Exception exception)
             {
                 this.logger.LogInformation("executing {command} gets crash! {msg} ", command, exception.Message);
-                this.logger.LogInformation("{stack_trace}", exception.StackTrace);
+                this.logger.LogInformation("{stack_trace}", exception.StackTrace.ToString());
             }
         }
 
