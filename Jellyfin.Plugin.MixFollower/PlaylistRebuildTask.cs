@@ -118,6 +118,7 @@ namespace Jellyfin.Plugin.MixFollower
 
         private async void CreatePlaylistFromFetchCommand(Guid user, string command)
         {
+            this.logger.LogInformation("cli command executing {Command}", command);
             var result = await Cli.Wrap(command).ExecuteBufferedAsync();
             if (!result.IsSuccess)
             {
@@ -222,8 +223,6 @@ namespace Jellyfin.Plugin.MixFollower
             var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
 
             this.logger.LogInformation("commands_to_fetch : {0}", commands_to_fetch[0]);
-
-            var item_ids = Array.Empty<Guid>();
 
             commands_to_fetch.ForEach(command => this.CreatePlaylistFromFetchCommand(this.firstAdminId, command));
         }
