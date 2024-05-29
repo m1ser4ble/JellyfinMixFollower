@@ -127,7 +127,7 @@ namespace Jellyfin.Plugin.MixFollower
             JObject obj = JObject.Parse(result.StandardOutput);
             string playlist_name = obj["name"] !.ToString();
             var songs = obj["songs"];
-            var list_items =[];
+            var list_items = new List<Guid>();
             foreach (var song in songs)
             {
                 var title = song["title"] !.ToString();
@@ -144,7 +144,7 @@ namespace Jellyfin.Plugin.MixFollower
                     }*/
                 }
 
-                list_items.Add(item);
+                list_items.Add(item.Id);
             }
 
             this.DeletePlaylist(playlist_name);
