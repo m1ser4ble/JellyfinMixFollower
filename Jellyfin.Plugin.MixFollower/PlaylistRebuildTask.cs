@@ -194,6 +194,7 @@ namespace Jellyfin.Plugin.MixFollower
             catch (Exception exception)
             {
                 this.logger.LogInformation("executing {command} gets crash! {msg} ", command, exception.Message);
+                this.logger.LogInformation("{stack_trace}", exception.StackTrace);
             }
         }
 
