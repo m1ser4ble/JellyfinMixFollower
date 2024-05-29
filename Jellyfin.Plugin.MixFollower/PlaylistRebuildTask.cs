@@ -116,7 +116,7 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger.LogInformation("matched and deleted ");
         }
 
-        private async void CreatePlaylistFromFetchCommand(Guid user, string command)
+        private async Task<Guid> CreatePlaylistFromFetchCommand(Guid user, string command)
         {
             this.logger.LogInformation("cli command executing {Command}", command);
             CliWrap.Buffered.BufferedCommandResult? result = null;
@@ -176,13 +176,17 @@ namespace Jellyfin.Plugin.MixFollower
                     // Users = [],
                     Public = true,
                 }).ConfigureAwait(false);
+
                 this.logger.LogInformation("playlist created {Id}", playlist.Id);
+                return playlist.Id;
             }
             catch (Exception exception)
             {
                 this.logger.LogInformation("executing {command} gets crash! {msg} ", command, exception.Message);
                 this.logger.LogInformation("{stack_trace}", exception.StackTrace.ToString());
             }
+
+            return Guid.Empty;
         }
 
         private Audio ConvertSearchHintInfoToAudio(SearchHintInfo hintInfo)
@@ -246,7 +250,7 @@ namespace Jellyfin.Plugin.MixFollower
 
             this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
 
-            commands_to_fetch.ForEach(command => this.CreatePlaylistFromFetchCommand(this.firstAdminId, command));
+            commands_to_fetch.ForEach(async command => await this.CreatePlaylistFromFetchCommand(this.firstAdminId, command).ConfigureAwait(false));
         }
     }
 }
