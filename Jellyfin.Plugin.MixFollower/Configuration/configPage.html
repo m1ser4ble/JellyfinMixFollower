@@ -30,7 +30,7 @@
                 <form id="configForm">
 
                     <div id="download_api_container" style="border: 2px solid green;">
-                        <div class="inputContainer" >
+                        <div id="clone_source" class="inputContainer" >
                             <label class="inputLabel inputLabelUnfocused" for="DownloadApi">Download api for missing song in library </label>
                             <input class="apiform" id="DownloadApi" name="Download" type="text" is="emby-input" />
                             <div class="fieldDescription"></div>
@@ -106,26 +106,10 @@
 
             document.querySelector("#AddDownloadApi").addEventListener("click", function() {
                 
-        // 새로운 vertical 요소 생성
-        var newVerticalDiv = document.createElement("div");
-        newVerticalDiv.className = "inputContainer";
-
-        // label 요소 생성
-        var newLabel = document.createElement("label");
-        newLabel.textContent = "Download api for missing song in library";
-
-        // input 요소 생성
-        var newInput = document.createElement("input");
-        newInput.type = "text";
-        newInput.is = "emby-input"
-        newInput.id = "input" + (document.querySelectorAll(".apiform").length + 1);
-
-        // vertical 요소에 label과 input 추가
-        newVerticalDiv.appendChild(newLabel);
-        newVerticalDiv.appendChild(newInput);
-
-        // container에 새로운 vertical 요소 추가
-        document.getElementById("download_api_container").insertBefore(newVerticalDiv, document.getElementById("insert_point"));
+                var src = document.querySelector("#clone_source");
+                var target = src.cloneNode(true);
+                target.id=src.id + "a";
+                document.getElementById("download_api_container").insertBefore(newVerticalDiv, document.getElementById("insert_point"));
 
         
     });
