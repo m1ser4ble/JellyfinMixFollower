@@ -119,7 +119,17 @@ namespace Jellyfin.Plugin.MixFollower
         private async void CreatePlaylistFromFetchCommand(Guid user, string command)
         {
             this.logger.LogInformation("cli command executing {Command}", command);
-            var result = await Cli.Wrap(command).ExecuteBufferedAsync();
+            CliWrap.Buffered.BufferedCommandResult? result = null;
+            try
+            {
+                result = await Cli.Wrap(command).ExecuteBufferedAsync();
+            }
+            catch (System.ComponentModel.Win32Exception exception)
+            {
+                this.logger.LogInformation("executing {command} gets crash! ", command, exception.Message);
+                return;
+            }
+
             if (!result.IsSuccess)
             {
                 throw new InvalidOperationException($"{command} failed! error code: {result.ExitCode}");
