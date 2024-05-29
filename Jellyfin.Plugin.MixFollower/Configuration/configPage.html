@@ -3,12 +3,29 @@
 <head>
     <meta charset="utf-8">
     <title>MixFollower</title>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .horizontal {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .horizontal .component {
+            margin-right: 10px; /* 여백 조정 */
+        }
+    </style>
 </head>
 <body>
     <div id="configPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox">
         <div data-role="content">
             <div class="content-primary">
                 <form id="configForm">
+
                     <div id="download_api_container" style="border: 2px solid green;">
                         <div class="inputContainer" >
                             <label class="inputLabel inputLabelUnfocused" for="DownloadApi">Download api for missing song in library </label>
@@ -27,16 +44,16 @@
                         </div>
                     </div>
                     <div id="command_container" style="border: 2px solid red;">
-                        <div>
+                        <div  class="horizontal">
                             <div >
-                                <label class="inputLabel inputLabelUnfocused" for="PlaylistName">Playlist name in jellyfin</label>
+                                <label for="PlaylistName">Playlist name in jellyfin</label>
                                 <input id="PlaylistName" name="PlaylistName" type="text" is="emby-input" />
-                                <div class="fieldDescription"></div>
+                                <div ></div>
                             </div>
                             <div >
-                                <label class="inputLabel inputLabelUnfocused" for="CommandsToFetch">Commands to fetch songs from mix </label>
+                                <label for="CommandsToFetch">Commands to fetch songs from mix </label>
                                 <input id="CommandsToFetch" name="CommandsToFetch" type="text" is="emby-input" />
-                                <div class="fieldDescription"></div>
+                                <div ></div>
                             </div>
                         </div>
                         <div>
