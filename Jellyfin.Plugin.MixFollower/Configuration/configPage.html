@@ -47,14 +47,14 @@
                         </div>
                     </div>
                     <div id="command_container" style="border: 2px solid red;">
-                        <div  class="horizontal">
-                            <div class="container">
+                      
+                            <div id="cmd_clone_src" class="container">
                                 <label class="component" for="CommandsToFetch">Commands to fetch songs from mix </label>
                                 <input class="component" id="CommandsToFetch" name="CommandsToFetch" type="text" is="emby-input" />
                                 <div ></div>
                             </div>
-                        </div>
-                        <div >
+                        
+                        <div id="insert_point_cmd">
                             <button
                                 is="emby-button"
                                 id="AddCommand"
@@ -82,10 +82,23 @@
                 .addEventListener('pageshow', function() {
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
+                        config.CommandsToFetch.forEach(function (command, index){
+                            var corresponding_id='#CommandsToFetch';
+                            if(index!=0){
+                                var src = document.querySelector("#cmd_clone_source");
+                                var target = src.cloneNode(true);
+                                target.id=src.id + str(index);
+                                var input_element = target.getElementById(corresponding_id);
+                                input_element.id = corresponding_id+str(index);
+                                
+                                document.getElementById("command_container").insertBefore(target, document.getElementById("insert_point_cmd"));
+                                corresponding_id=input_element.id;
+                            }
+                            document.querySelector(corresponding_id).value = config.CommandsToFetch[index];
+
+
+                        });
                         
-                        document.querySelector('#CommandsToFetch').value = config.CommandsToFetch[0];
-                        var component = document.querySelector('#CommandsToFetch');
-                        //document.querySelector("command_container").append(component);
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -109,10 +122,20 @@
                 var src = document.querySelector("#clone_source");
                 var target = src.cloneNode(true);
                 target.id=src.id + "a";
-                document.getElementById("download_api_container").insertBefore(target, document.getElementById("insert_point"));
+                document.getElementById("command_container").insertBefore(target, document.getElementById("insert_point"));
 
         
-    });
+            });
+
+            document.querySelector("#AddButton").addEventListener("click", function() {
+                
+                var src = document.querySelector("#cmd_clone_source");
+                var target = src.cloneNode(true);
+                target.id=src.id + "a";
+                document.getElementById("download_api_container").insertBefore(target, document.getElementById("insert_point_cmd"));
+
+        
+            });
 
         </script>
     </div>
