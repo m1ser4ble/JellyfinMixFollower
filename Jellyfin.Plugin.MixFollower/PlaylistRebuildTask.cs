@@ -126,6 +126,8 @@ namespace Jellyfin.Plugin.MixFollower
 
                 // result.ToString();
                 string json = result.StandardOutput.ToString();
+                string deepcopy = string.Empty;
+                json.CopyTo(deepcopy);
                 this.logger.LogInformation("result : {stdout}", json);
 
                 JObject obj = JObject.Parse(json);
@@ -145,14 +147,15 @@ namespace Jellyfin.Plugin.MixFollower
                 var list_items = new List<Guid>();
                 foreach (var song in songs.Children<JObject>())
                 {
-                    this.logger.LogInformation("i am one of the song");
                     var title = song.GetValue("title").ToString();
                     var artist = song.GetValue("artist").ToString();
+                    this.logger.LogInformation("{T} : {A}", title, artist);
 
                     var item = this.GetMostMatchedSong(title, artist);
-                    if (item.Id == Guid.Empty)
+                    if (item is null)
                     {
                         this.logger.LogInformation("song {Title} by {Artist} not found in library", title, artist);
+                        continue;
                         /*
                         item = DownloadMusic();
                         if(item == Guid.Empty)
@@ -201,7 +204,7 @@ namespace Jellyfin.Plugin.MixFollower
             }
         }
 
-        private Audio GetMostMatchedSong(string title, string artist)
+        private Audio? GetMostMatchedSong(string title, string artist)
         {
             var hints = this.searchEngine.GetSearchHints(new SearchQuery()
             {
