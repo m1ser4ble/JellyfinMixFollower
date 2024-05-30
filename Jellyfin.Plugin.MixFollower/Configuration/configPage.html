@@ -129,12 +129,16 @@
                 var src = document.querySelector("#clone_source");
                 var target = src.cloneNode(true);
                 target.id=src.id + "a";
-                document.getElementById("download_api_container").insertBefore(target, document.getElementById("insert_point"));
+                var parent = document.getElementById("download_api_container");
+                var younger_sibling = document.getElementById("insert_point");
+                console.log(parent);
+                console.log(younger_sibling);
+                parent.insertBefore(target, younger_sibling);
 
         
             });
 
-            document.querySelector("#AddButton").addEventListener("click", function() {
+            document.querySelector("#AddCommand").addEventListener("click", function() {
                 
                 var src = document.querySelector("#cmd_clone_source");
                 var target = src.cloneNode(true);
