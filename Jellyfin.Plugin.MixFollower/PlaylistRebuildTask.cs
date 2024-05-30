@@ -126,19 +126,10 @@ namespace Jellyfin.Plugin.MixFollower
 
                 // result.ToString();
                 string json = result.StandardOutput.ToString();
-                this.logger.LogInformation("result : {stdout}", json);
 
                 JObject obj = JObject.Parse(json);
-                this.logger.LogInformation("parse success");
 
-                foreach (var prop in obj.Properties())
-                {
-                    this.logger.LogInformation("prop: {pro}", prop.ToString());
-                }
-
-                this.logger.LogInformation("do i have name key ? {tf}", obj.ContainsKey("name"));
                 string playlist_name = obj.GetValue("name").ToString();
-                this.logger.LogInformation("I will make playlist {d}", playlist_name);
 
                 var songs = obj.GetValue("songs");
 
@@ -147,19 +138,18 @@ namespace Jellyfin.Plugin.MixFollower
                 {
                     var title = song.GetValue("title").ToString();
                     var artist = song.GetValue("artist").ToString();
-                    this.logger.LogInformation("{T} : {A}", title, artist);
 
                     var item = this.GetMostMatchedSong(title, artist);
                     if (item is null)
                     {
                         this.logger.LogInformation("song {Title} by {Artist} not found in library", title, artist);
-                        continue;
-                        /*
-                        item = DownloadMusic();
-                        if(item == Guid.Empty)
+
+                        item = await this.DownloadMusic(title, artist).ConfigureAwait(false);
+                        if (item is null)
                         {
-                            throw new InvalidOperationException("");
-                        }*/
+                            this.logger.LogInformation("tried download , but still not in library");
+                            continue;
+                        }
                     }
 
                     list_items.Add(item.Id);
@@ -198,6 +188,7 @@ namespace Jellyfin.Plugin.MixFollower
                 case Audio song:
                     return song;
                 default:
+                    this.logger.LogInformation("my type is... {Type}", item.GetType().ToString());
                     throw new ArgumentException("base item is not a type of audio");
             }
         }
@@ -216,25 +207,36 @@ namespace Jellyfin.Plugin.MixFollower
             .FirstOrDefault();
         }
 
-        private async Task<bool> DownloadMusicFromSource(string api, string title, string artist)
+        private async Task<bool> DownloadMusicFromSource(string source, string title, string artist)
         {
-            return true;
+            if (source.StartsWith("https"))
+            {
+                return false;
+            }
+
+            var interpolated = source.Replace("${title}", title)
+                                     .Replace("${artist}", artist);
+
+            var result = await Cli.Wrap(interpolated).ExecuteBufferedAsync();
+            return result.IsSuccess;
         }
 
-        private async Task<Audio> DownloadMusic(string title, string artist)
+        private async Task<Audio?> DownloadMusic(string title, string artist)
         {
-            var apis_download = Plugin.Instance.Configuration.ApisDownload;
-            foreach (var api in apis_download)
+            var methods_to_download = Plugin.Instance.Configuration.ApisDownload;
+            foreach (var source in methods_to_download)
             {
                 try
                 {
-                    var success = this.DownloadMusicFromSource(api, title, artist);
-
-                    return this.GetMostMatchedSong(title, artist);
+                    var success = await this.DownloadMusicFromSource(source, title, artist).ConfigureAwait(false);
+                    if (success)
+                    {
+                        return this.GetMostMatchedSong(title, artist);
+                    }
                 }
                 catch (Exception e)
                 {
-                    this.logger.LogInformation("download from {Source} failed  {Msg}", api, e.Message);
+                    this.logger.LogInformation("download from {Source} failed  {Msg}", source, e.Message);
                 }
             }
 

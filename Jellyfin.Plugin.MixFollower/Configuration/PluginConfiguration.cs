@@ -43,10 +43,20 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public bool TrueFalseSetting { get; set; }
 
+    private List<string> apiDownload;
+
     /// <summary>
     /// Gets or sets api for downloading missing songs in my library.
     /// </summary>
-    public List<string> ApisDownload { get; set; }
+    public List<string> ApisDownload
+    {
+        get => this.apiDownload; set
+        {
+            this.apiDownload = value.Where((source) => !string.IsNullOrEmpty(source)).ToList();
+        }
+
+;
+    }
 
     private List<string> commandsToFetch;
 

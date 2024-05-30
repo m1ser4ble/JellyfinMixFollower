@@ -82,6 +82,30 @@
                 .addEventListener('pageshow', function() {
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
+                        config.ApisDownload.forEach(function (source, index){
+                            var corresponding_id = '';
+                            if(index!=0){
+                                console.log("#####start####");
+                                var src = document.querySelector("#cmd_clone_source");
+                                console.log(src);
+                                var target = src.cloneNode(true);
+                                target.id=src.id + index.toString();
+                                console.log(target);
+                                var input_element = target.querySelector('input');
+                                input_element.id = corresponding_id+index.toString();
+                                
+                                document.getElementById("command_container").insertBefore(target, document.getElementById("insert_point_cmd"));
+                                corresponding_id=input_element.id;
+                            }
+                            console.log('query id :  ' + corresponding_id);
+                            var element_to_inject = document.querySelector('#'+corresponding_id);
+                            console.log('element : ' );
+                            console.log( element_to_inject);
+                            element_to_inject.value = config.CommandsToFetch[index];
+
+
+                        })
+
                         config.CommandsToFetch.forEach(function (command, index){
                             var corresponding_id='CommandsToFetch';
                             if(index!=0){
@@ -122,6 +146,13 @@
                         console.log(input);
                         config.CommandsToFetch[index] = input.value;
                     });
+
+                    const download_api_container = document.querySelector('#download_api_container');
+                    const inputs = download_api_container.querySelectorAll('.inputContainer [name="Download"]');
+                    inputs.forEach((input, index))=> {
+                        console.log(input);
+                        config.ApisDownload[index] = input.value;
+                    }
 
 
 
