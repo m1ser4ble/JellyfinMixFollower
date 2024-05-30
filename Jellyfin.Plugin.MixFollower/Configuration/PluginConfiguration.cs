@@ -50,12 +50,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public List<string> ApisDownload
     {
-        get => this.apiDownload; set
+        get => this.apiDownload;
+        set
         {
             this.apiDownload = value.Where((source) => !string.IsNullOrEmpty(source)).ToList();
         }
-
-;
     }
 
     private List<string> commandsToFetch;
