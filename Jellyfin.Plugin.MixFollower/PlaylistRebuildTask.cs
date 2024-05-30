@@ -252,6 +252,7 @@ namespace Jellyfin.Plugin.MixFollower
             var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
 
             this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
+            commands_to_fetch.ForEach((command) => this.logger.LogInformation("each command {Command}", command));
 
             commands_to_fetch.ForEach(async command => await this.CreatePlaylistFromFetchCommand(this.firstAdminId, command).ConfigureAwait(false));
         }
