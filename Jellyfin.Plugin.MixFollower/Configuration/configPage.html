@@ -97,7 +97,10 @@
                                 document.getElementById("command_container").insertBefore(target, document.getElementById("insert_point_cmd"));
                                 corresponding_id=input_element.id;
                             }
-                            document.querySelector(corresponding_id).value = config.CommandsToFetch[index];
+                            console.log(`query id :  ${corresponding_id}`);
+                            var element_to_inject = document.querySelector(corresponding_id);
+                            console.log(`element : ${element_to_inject}`);
+                            element_to_inject.value = config.CommandsToFetch[index];
 
 
                         });
