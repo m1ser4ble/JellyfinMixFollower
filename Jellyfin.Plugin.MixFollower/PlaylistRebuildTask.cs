@@ -269,7 +269,7 @@ namespace Jellyfin.Plugin.MixFollower
             }
 
             this.logger.LogInformation("tried all wonload source but all failed.");
-            return new Audio();
+            return null;
         }
 
         /// <inheritdoc />
