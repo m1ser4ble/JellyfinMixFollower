@@ -203,10 +203,31 @@ namespace Jellyfin.Plugin.MixFollower
                 MediaTypes =[MediaType.Audio],
                 SearchTerm = title,
             });
+            var lambda = (Audio? song) =>
+            {
+                if (song is null)
+                {
+                    return false;
+                }
+
+                var contains = (string a) =>
+                {
+                    this.logger.LogInformation("existing song artist : {A}", a);
+
+                    return a.Contains(artist) || artist.Contains(a);
+                };
+                var result = song.Artists.Any(contains);
+                this.logger.LogInformation("result : {R}", result);
+
+                return result;
+            };
+
             return hints.Items
             .Select(this.ConvertSearchHintInfoToAudio)
-            .Where(song =>
-                song.Artists.Any(song_artist => song_artist.Contains(artist) || artist.Contains(song_artist)))
+            .Where(lambda)
+            /*song =>
+            song is not null &&
+            song.Artists.Any(song_artist => song_artist.Contains(artist) || artist.Contains(song_artist))*/
             .FirstOrDefault();
         }
 
