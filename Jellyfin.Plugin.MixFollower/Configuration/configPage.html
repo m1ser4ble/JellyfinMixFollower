@@ -83,7 +83,7 @@
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
                         config.CommandsToFetch.forEach(function (command, index){
-                            var corresponding_id='#CommandsToFetch';
+                            var corresponding_id='CommandsToFetch';
                             if(index!=0){
                                 console.log("#####start####");
                                 var src = document.querySelector("#cmd_clone_source");
@@ -98,7 +98,7 @@
                                 corresponding_id=input_element.id;
                             }
                             console.log('query id :  ' + corresponding_id);
-                            var element_to_inject = document.querySelector(corresponding_id);
+                            var element_to_inject = document.querySelector('#'+corresponding_id);
                             console.log('element : ' );
                             console.log( element_to_inject);
                             element_to_inject.value = config.CommandsToFetch[index];
