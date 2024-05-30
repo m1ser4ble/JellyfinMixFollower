@@ -85,7 +85,9 @@
                         config.CommandsToFetch.forEach(function (command, index){
                             var corresponding_id='#CommandsToFetch';
                             if(index!=0){
+                                console.log("#####start####");
                                 var src = document.querySelector("#cmd_clone_source");
+                                console.log(src);
                                 var target = src.cloneNode(true);
                                 target.id=src.id + index.toString();
                                 console.log(target);
