@@ -171,6 +171,10 @@ namespace Jellyfin.Plugin.MixFollower
                 this.logger.LogInformation("playlist created {Id}", playlist.Id);
                 return playlist.Id;
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception exception)
             {
                 this.logger.LogInformation("executing {command} gets crash! {msg} ", command, exception.Message);
@@ -180,7 +184,7 @@ namespace Jellyfin.Plugin.MixFollower
             return string.Empty;
         }
 
-        private Audio ConvertSearchHintInfoToAudio(SearchHintInfo hintInfo)
+        private Audio? ConvertSearchHintInfoToAudio(SearchHintInfo hintInfo)
         {
             var item = hintInfo.Item;
             switch (item)
@@ -188,8 +192,7 @@ namespace Jellyfin.Plugin.MixFollower
                 case Audio song:
                     return song;
                 default:
-                    this.logger.LogInformation("my type is... {Type}", item.GetType().ToString());
-                    throw new ArgumentException("base item is not a type of audio");
+                    return null;
             }
         }
 
@@ -234,6 +237,10 @@ namespace Jellyfin.Plugin.MixFollower
                         return this.GetMostMatchedSong(title, artist);
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
                 catch (Exception e)
                 {
                     this.logger.LogInformation("download from {Source} failed  {Msg}", source, e.Message);
@@ -248,6 +255,7 @@ namespace Jellyfin.Plugin.MixFollower
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
             this.logger.LogInformation("ExecuteAsync");
+            cancellationToken.ThrowIfCancellationRequested();
 
             var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
 
