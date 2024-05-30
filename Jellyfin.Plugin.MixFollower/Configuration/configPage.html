@@ -48,7 +48,7 @@
                     </div>
                     <div id="command_container" style="border: 2px solid red;">
                       
-                            <div id="cmd_clone_source" class="container">
+                            <div id="cmd_clone_source" class="inputContainer">
                                 <label class="component" for="CommandsToFetch">Commands to fetch songs from mix </label>
                                 <input class="component" id="CommandsToFetch" name="CommandsToFetch" type="text" is="emby-input" />
                                 <div ></div>
@@ -114,7 +114,18 @@
                 .addEventListener('submit', function(e) {
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
-                    config.CommandsToFetch[0] = document.querySelector('#CommandsToFetch').value;
+                    console.log('#############save ######');
+                    const command_container = document.querySelector('#command_container');
+                    console.log(command_container);
+                    const inputs = command_container.querySelectorAll('.inputContainer [name="CommandsToFetch"]');
+                    inputs.forEach((input, index) => {
+                        console.log(input);
+                        config.CommandsToFetch[index] = input.value;
+                    });
+
+
+
+                   
                     ApiClient.updatePluginConfiguration(TemplateConfig.pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);
                     });
@@ -143,6 +154,9 @@
                 var src = document.querySelector("#cmd_clone_source");
                 var target = src.cloneNode(true);
                 target.id=src.id + "a";
+                var input_element = target.querySelector('input');
+                input_element.value="";
+                input_element.id = "a";
                 document.getElementById("command_container").insertBefore(target, document.getElementById("insert_point_cmd"));
 
         
