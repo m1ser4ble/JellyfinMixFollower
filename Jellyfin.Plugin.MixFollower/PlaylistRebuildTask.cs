@@ -27,6 +27,7 @@ namespace Jellyfin.Plugin.MixFollower
     using MediaBrowser.Model.Playlists;
     using MediaBrowser.Model.Search;
     using MediaBrowser.Model.Tasks;
+    using Microsoft.AspNetCore.Components.Web;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
@@ -124,7 +125,7 @@ namespace Jellyfin.Plugin.MixFollower
             CliWrap.Buffered.BufferedCommandResult? result = null;
             try
             {
-                result = await Cli.Wrap(command).ExecuteBufferedAsync();
+                result = await Cli.Wrap(command).ExecuteBufferedAsync().ConfigureAwait(false);
 
                 // result.ToString();
                 string json = result.StandardOutput.ToString();
@@ -145,16 +146,17 @@ namespace Jellyfin.Plugin.MixFollower
                     if (item is null)
                     {
                         item = await this.DownloadMusic(title, artist).ConfigureAwait(false);
-                        if (item is null)
-                        {
-                            this.logger.LogInformation("tried download , but still not in library");
-                            continue;
-                        }
+                        continue;
                     }
 
                     list_items.Add(item.Id);
                 }
 
+                IProgress<double> progress;
+                CancellationToken cancellationToken;
+
+                // _iLibraryMonitor.ReportFileSystemChangeComplete(path, false);
+                // libraryManager.ValidateMediaLibraryInternal(progress, cancellationToken);
                 this.DeletePlaylist(playlist_name);
 
                 var playlist = await this.playlistManager.CreatePlaylist(new PlaylistCreationRequest
@@ -240,7 +242,8 @@ namespace Jellyfin.Plugin.MixFollower
 
             var result = await Cli.Wrap(cmd[0])
             .WithArguments(cmd[1])
-            .ExecuteBufferedAsync();
+            .ExecuteBufferedAsync()
+            .ConfigureAwait(false);
             return result.IsSuccess;
         }
 
