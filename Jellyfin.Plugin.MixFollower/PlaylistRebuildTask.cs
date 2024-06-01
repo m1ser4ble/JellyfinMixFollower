@@ -242,6 +242,7 @@ namespace Jellyfin.Plugin.MixFollower
                                      .Replace("${artist}", artist);
 
             var result = await Cli.Wrap(interpolated).ExecuteBufferedAsync();
+            this.logger.LogInformation("Cli output Msg\n {Msg}", result.StandardOutput);
             return result.IsSuccess;
         }
 
@@ -250,6 +251,7 @@ namespace Jellyfin.Plugin.MixFollower
             var methods_to_download = Plugin.Instance.Configuration.ApisDownload;
             foreach (var source in methods_to_download)
             {
+                this.logger.LogInformation("try to download from {Source}", source);
                 try
                 {
                     var success = await this.DownloadMusicFromSource(source, title, artist).ConfigureAwait(false);
