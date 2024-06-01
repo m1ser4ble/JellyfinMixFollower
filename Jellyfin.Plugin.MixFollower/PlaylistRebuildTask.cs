@@ -238,8 +238,8 @@ namespace Jellyfin.Plugin.MixFollower
                 return false;
             }
 
-            var interpolated = source.Replace("${title}", title)
-                                     .Replace("${artist}", artist);
+            var interpolated = source.Replace("${title}", "\"" + title + "\"")
+                                     .Replace("${artist}", "\"" + artist + "\"");
 
             var result = await Cli.Wrap(interpolated).ExecuteBufferedAsync();
             this.logger.LogInformation("Cli output Msg\n {Msg}", result.StandardOutput);
