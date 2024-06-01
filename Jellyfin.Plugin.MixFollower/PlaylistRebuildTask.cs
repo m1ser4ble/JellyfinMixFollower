@@ -142,8 +142,6 @@ namespace Jellyfin.Plugin.MixFollower
                     var item = this.GetMostMatchedSong(title, artist);
                     if (item is null)
                     {
-                        this.logger.LogInformation("song {Title} by {Artist} not found in library", title, artist);
-
                         item = await this.DownloadMusic(title, artist).ConfigureAwait(false);
                         if (item is null)
                         {
@@ -168,7 +166,6 @@ namespace Jellyfin.Plugin.MixFollower
                     Public = true,
                 }).ConfigureAwait(false);
 
-                this.logger.LogInformation("playlist created {Id}", playlist.Id);
                 return playlist.Id;
             }
             catch (OperationCanceledException)
@@ -212,12 +209,9 @@ namespace Jellyfin.Plugin.MixFollower
 
                 var contains = (string a) =>
                 {
-                    this.logger.LogInformation("existing song artist : {A}", a);
-
                     return a.Contains(artist) || artist.Contains(a);
                 };
                 var result = song.Artists.Any(contains);
-                this.logger.LogInformation("result : {R}", result);
 
                 return result;
             };
@@ -245,7 +239,6 @@ namespace Jellyfin.Plugin.MixFollower
             var result = await Cli.Wrap(cmd[0])
             .WithArguments(cmd[1])
             .ExecuteBufferedAsync();
-            this.logger.LogInformation("Cli output Msg\n {Msg}", result.StandardOutput);
             return result.IsSuccess;
         }
 
@@ -254,7 +247,6 @@ namespace Jellyfin.Plugin.MixFollower
             var methods_to_download = Plugin.Instance.Configuration.ApisDownload;
             foreach (var source in methods_to_download)
             {
-                this.logger.LogInformation("try to download from {Source}", source);
                 try
                 {
                     var success = await this.DownloadMusicFromSource(source, title, artist).ConfigureAwait(false);
@@ -273,7 +265,6 @@ namespace Jellyfin.Plugin.MixFollower
                 }
             }
 
-            this.logger.LogInformation("tried all wonload source but all failed.");
             return null;
         }
 
