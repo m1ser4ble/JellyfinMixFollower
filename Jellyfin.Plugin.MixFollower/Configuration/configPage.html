@@ -83,10 +83,10 @@
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
                         config.ApisDownload.forEach(function (source, index){
-                            var corresponding_id = '';
+                            var corresponding_id = 'DownloadApi';
                             if(index!=0){
                                 console.log("#####start####");
-                                var src = document.querySelector("#cmd_clone_source");
+                                var src = document.querySelector("#clone_source");
                                 console.log(src);
                                 var target = src.cloneNode(true);
                                 target.id=src.id + index.toString();
