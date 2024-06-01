@@ -240,7 +240,7 @@ namespace Jellyfin.Plugin.MixFollower
 
             var interpolated = source.Replace("${title}", "\"" + title + "\"")
                                      .Replace("${artist}", "\"" + artist + "\"");
-            var cmd = interpolated.Split();
+            var cmd = interpolated.Split(' ', 2);
 
             var result = await Cli.Wrap(cmd[0])
             .WithArguments(cmd.Skip(1))
