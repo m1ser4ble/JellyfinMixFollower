@@ -98,7 +98,7 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger.LogInformation("PlaylistRebuild GetDefaultTriggers");
             return new[]
             {
-                new TaskTriggerInfo { Type = TaskTriggerInfo.TriggerInterval, IntervalTicks = TimeSpan.FromMinutes(1).Ticks /*TimeSpan.FromHours(24).Ticks*/ },
+                new TaskTriggerInfo { Type = TaskTriggerInfo.TriggerInterval, IntervalTicks = TimeSpan.FromHours(24).Ticks },
             };
         }
 
