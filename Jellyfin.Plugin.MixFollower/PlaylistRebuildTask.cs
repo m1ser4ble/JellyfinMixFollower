@@ -243,7 +243,7 @@ namespace Jellyfin.Plugin.MixFollower
             var cmd = interpolated.Split(' ', 2);
 
             var result = await Cli.Wrap(cmd[0])
-            .WithArguments(cmd.Skip(1))
+            .WithArguments(cmd[1])
             .ExecuteBufferedAsync();
             this.logger.LogInformation("Cli output Msg\n {Msg}", result.StandardOutput);
             return result.IsSuccess;
