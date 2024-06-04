@@ -199,6 +199,7 @@ namespace Jellyfin.Plugin.MixFollower
 
         private Audio? GetMostMatchedSong(string title, string artist)
         {
+            bool hellnback = title == "Hell N Back" ? true : false;
             var hints = this.searchEngine.GetSearchHints(new SearchQuery()
             {
                 MediaTypes =[MediaType.Audio],
@@ -213,6 +214,7 @@ namespace Jellyfin.Plugin.MixFollower
 
                 var contains = (string a) =>
                 {
+                    this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
                     return a.Contains(artist) || artist.Contains(a);
                 };
                 var result = song.Artists.Any(contains);
