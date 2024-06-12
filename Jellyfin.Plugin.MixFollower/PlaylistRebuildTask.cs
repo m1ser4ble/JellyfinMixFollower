@@ -199,7 +199,7 @@ namespace Jellyfin.Plugin.MixFollower
 
         private Audio? GetMostMatchedSong(string title, string artist)
         {
-            bool hellnback = title == "Hell N Back" ? true : false;
+            this.logger.LogInformation("Querying with {Query}...", title);
             var hints = this.searchEngine.GetSearchHints(new SearchQuery()
             {
                 MediaTypes =[MediaType.Audio],
@@ -222,13 +222,19 @@ namespace Jellyfin.Plugin.MixFollower
                 return result;
             };
 
-            return hints.Items
+            var song = hints.Items
             .Select(this.ConvertSearchHintInfoToAudio)
             .Where(lambda)
             /*song =>
             song is not null &&
             song.Artists.Any(song_artist => song_artist.Contains(artist) || artist.Contains(song_artist))*/
             .FirstOrDefault();
+            if (song is null)
+            {
+                this.logger.LogInformation("Query failed with artist {Artist}", artist);
+            }
+
+            return song;
         }
 
         private async Task<bool> DownloadMusicFromSource(string source, string title, string artist)
