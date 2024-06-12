@@ -200,6 +200,7 @@ namespace Jellyfin.Plugin.MixFollower
         private Audio? GetMostMatchedSong(string title, string artist)
         {
             this.logger.LogInformation("Querying with {Query}...", title);
+            var tokenized_artist = artist.Split(' ');
             var hints = this.searchEngine.GetSearchHints(new SearchQuery()
             {
                 MediaTypes =[MediaType.Audio],
@@ -214,8 +215,9 @@ namespace Jellyfin.Plugin.MixFollower
 
                 var contains = (string a) =>
                 {
-                    this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
-                    return a.Contains(artist) || artist.Contains(a);
+                    return tokenized_artist.Any(token => a.Contains(token) || a.Contains(token));
+
+                    // this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
                 };
                 var result = song.Artists.Any(contains);
 
