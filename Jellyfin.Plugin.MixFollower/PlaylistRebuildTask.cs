@@ -223,6 +223,7 @@ namespace Jellyfin.Plugin.MixFollower
             var tokenized_artist = artist.Split(['(', ' ', ')']);
 
             var result = this.libraryManager.GetItemList(query);
+            this.logger.LogInformation("The first item path : {Path}", result.FirstOrDefault().Path);
 
             var song = result.Select(this.ConvertItemToAudio)
             .Where(song => this.SubstrMetric(song, tokenized_artist))
