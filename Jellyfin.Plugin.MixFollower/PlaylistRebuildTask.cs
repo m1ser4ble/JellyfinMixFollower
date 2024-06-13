@@ -217,8 +217,8 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger.LogInformation("LibrarySearchQuerying with {Query}", title);
             var query = new InternalItemsQuery(this.firstAdmin)
             {
-                SearchTerm = title,
-                MediaTypes =[MediaType.Audio],
+                NameContains = title,
+                MediaTypes =[MediaType.Audio,],
             };
             var tokenized_artist = artist.Split(['(', ' ', ')']);
 
