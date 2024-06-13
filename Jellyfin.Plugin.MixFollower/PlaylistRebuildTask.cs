@@ -15,6 +15,7 @@ namespace Jellyfin.Plugin.MixFollower
     using System.Threading.Tasks;
     using CliWrap;
     using CliWrap.Buffered;
+    using Jellyfin.Data.Entities;
     using Jellyfin.Data.Entities.Libraries;
     using Jellyfin.Data.Enums;
     using MediaBrowser.Controller.Entities;
@@ -30,6 +31,7 @@ namespace Jellyfin.Plugin.MixFollower
     using Microsoft.AspNetCore.Components.Web;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
+    using Microsoft.VisualBasic;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -38,6 +40,7 @@ namespace Jellyfin.Plugin.MixFollower
     public class PlaylistRebuildTask : IScheduledTask, IConfigurableScheduledTask
     {
         private readonly Guid firstAdminId;
+        private readonly User firstAdmin;
         private readonly ILibraryManager libraryManager;
         private readonly IPlaylistManager playlistManager;
         private readonly IUserManager userManager;
@@ -62,8 +65,8 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger = logger;
             this.localization = localization;
             this.searchEngine = searchEngine;
-            this.firstAdminId = this.userManager.Users
-                .First(i => i.HasPermission(PermissionKind.IsAdministrator)).Id;
+            this.firstAdmin = this.userManager.Users.First(i => i.HasPermission(PermissionKind.IsAdministrator));
+            this.firstAdminId = this.firstAdmin.Id;
             this.logger.LogInformation("PlaylistRebuildTask constructed");
         }
 
@@ -146,7 +149,14 @@ namespace Jellyfin.Plugin.MixFollower
                     if (item is null)
                     {
                         item = await this.DownloadMusic(title, artist).ConfigureAwait(false);
-                        continue;
+                        if (item is null)
+                        {
+                            item = this.GetMostMatchedSongWithLibrarySearch(title, artist);
+                            if (item is null)
+                            {
+                                continue;
+                            }
+                        }
                     }
 
                     list_items.Add(item.Id);
@@ -188,6 +198,11 @@ namespace Jellyfin.Plugin.MixFollower
         private Audio? ConvertSearchHintInfoToAudio(SearchHintInfo hintInfo)
         {
             var item = hintInfo.Item;
+            return this.ConvertItemToAudio(item);
+        }
+
+        private Audio? ConvertItemToAudio(BaseItem item)
+        {
             switch (item)
             {
                 case Audio song:
@@ -197,36 +212,60 @@ namespace Jellyfin.Plugin.MixFollower
             }
         }
 
+        private Audio? GetMostMatchedSongWithLibrarySearch(string title, string artist)
+        {
+            this.logger.LogInformation("LibrarySearchQuerying with {Query}", title);
+            var query = new InternalItemsQuery(this.firstAdmin)
+            {
+                SearchTerm = title,
+                MediaTypes =[MediaType.Audio],
+            };
+            var tokenized_artist = artist.Split(['(', ' ', ')']);
+
+            var result = this.libraryManager.GetItemList(query);
+
+            var song = result.Select(this.ConvertItemToAudio)
+            .Where(song => this.SubstrMetric(song, tokenized_artist))
+            .FirstOrDefault();
+            if (song is null)
+            {
+                this.logger.LogInformation("even LibrarySearch failed...");
+            }
+
+            return song;
+        }
+
+        private bool SubstrMetric(Audio? song, string[] tokenized_artist)
+        {
+            if (song is null)
+            {
+                return false;
+            }
+
+            var contains = (string a) =>
+            {
+                return tokenized_artist.Any(token => a.Contains(token) || a.Contains(token));
+
+                // this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
+            };
+            var result = song.Artists.Any(contains);
+
+            return result;
+        }
+
         private Audio? GetMostMatchedSong(string title, string artist)
         {
             this.logger.LogInformation("Querying with {Query}...", title);
-            var tokenized_artist = artist.Split(' ');
+            var tokenized_artist = artist.Split(['(', ' ', ')']);
             var hints = this.searchEngine.GetSearchHints(new SearchQuery()
             {
                 MediaTypes =[MediaType.Audio],
                 SearchTerm = title,
             });
-            var lambda = (Audio? song) =>
-            {
-                if (song is null)
-                {
-                    return false;
-                }
-
-                var contains = (string a) =>
-                {
-                    return tokenized_artist.Any(token => a.Contains(token) || a.Contains(token));
-
-                    // this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
-                };
-                var result = song.Artists.Any(contains);
-
-                return result;
-            };
 
             var song = hints.Items
             .Select(this.ConvertSearchHintInfoToAudio)
-            .Where(lambda)
+            .Where(song => this.SubstrMetric(song, tokenized_artist))
             /*song =>
             song is not null &&
             song.Artists.Any(song_artist => song_artist.Contains(artist) || artist.Contains(song_artist))*/
