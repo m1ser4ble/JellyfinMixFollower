@@ -220,17 +220,12 @@ namespace Jellyfin.Plugin.MixFollower
         private Audio? GetMostMatchedSongWithLibrarySearch(string title, string artist)
         {
             this.logger.LogInformation("LibrarySearchQuerying with {Query}", title);
-            var expected_name = title.Split(' ').FirstOrDefault();
-            var query = new InternalItemsQuery(this.firstAdmin)
-            {
-                NameContains = expected_name,
-                MediaTypes =[MediaType.Audio,],
-            };
-            this.logger.LogInformation("Expected Name : {Exp}", expected_name);
+            var db = new MetaDb(this.libraryManager);
+            db.RecreateDb();
+            var result = db.SearchByPath(title);
             var tokenized_artist = artist.Split(['(', ' ', ')']);
 
-            var result = this.libraryManager.GetItemList(query);
-            this.logger.LogInformation("# of query results ( all music) : {Count}", result.Count);
+            this.logger.LogInformation("# of query results ( all music) : {Count}", result.Count());
 
             result.Select(this.ConvertItemToAudio)
             .ToList()
@@ -263,7 +258,7 @@ namespace Jellyfin.Plugin.MixFollower
 
             var contains = (string a) =>
             {
-                return tokenized_artist.Any(token => a.Contains(token) || a.Contains(token));
+                return tokenized_artist.Any(token => a.Contains(token, StringComparison.OrdinalIgnoreCase) || a.Contains(token, StringComparison.OrdinalIgnoreCase));
 
                 // this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
             };
