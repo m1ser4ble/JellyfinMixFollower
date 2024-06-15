@@ -261,6 +261,13 @@ namespace Jellyfin.Plugin.MixFollower
                 // this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
             };
             var result = song.Artists.Any(contains);
+            if (!result)
+            {
+                var join = string.Join(' ', tokenized_artist);
+                this.logger.LogInformation("I want artist {Joined}", join);
+                this.logger.LogInformation("song artists...");
+                song.Artists.ToList().ForEach(a => this.logger.LogInformation("Artist : {A}", a));
+            }
 
             return result;
         }
