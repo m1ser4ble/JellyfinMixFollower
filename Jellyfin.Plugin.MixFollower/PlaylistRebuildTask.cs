@@ -220,9 +220,10 @@ namespace Jellyfin.Plugin.MixFollower
         private Audio? GetMostMatchedSongWithLibrarySearch(string title, string artist)
         {
             this.logger.LogInformation("LibrarySearchQuerying with {Query}", title);
+            var expected_name = title.Split(' ').FirstOrDefault();
             var query = new InternalItemsQuery(this.firstAdmin)
             {
-                // NameContains = title,
+                Name = expected_name,
                 MediaTypes =[MediaType.Audio,],
             };
             var tokenized_artist = artist.Split(['(', ' ', ')']);
@@ -239,9 +240,8 @@ namespace Jellyfin.Plugin.MixFollower
                     return;
                 }
 
-                this.logger.LogInformation("name {N} and name contains {C}", song.Name, song.Name.Contains(title));
+                this.logger.LogInformation("name {N} and path {Path}", song.Name, song.Path);
             });
-            return null;
             var song = result.Select(this.ConvertItemToAudio)
             .Where(song => this.SubstrMetric(song, tokenized_artist))
             .FirstOrDefault();
