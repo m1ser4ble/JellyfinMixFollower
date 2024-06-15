@@ -37,4 +37,10 @@ public class MetaDb
     {
         return this.db.Where(song => song.Path.Contains(path, StringComparison.OrdinalIgnoreCase));
     }
+
+    public IEnumerable<BaseItem> SearchByFilename(string filename)
+    {
+        return this.db.Where(song =>
+            song.FileNameWithoutExtension.Contains(filename, StringComparison.OrdinalIgnoreCase));
+    }
 }

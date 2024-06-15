@@ -40,6 +40,7 @@ namespace Jellyfin.Plugin.MixFollower
     public class PlaylistRebuildTask : IScheduledTask, IConfigurableScheduledTask
     {
         private readonly Guid firstAdminId;
+        private MetaDb db;
         private readonly User firstAdmin;
         private readonly ILibraryManager libraryManager;
         private readonly IPlaylistManager playlistManager;
@@ -67,6 +68,8 @@ namespace Jellyfin.Plugin.MixFollower
             this.searchEngine = searchEngine;
             this.firstAdmin = this.userManager.Users.First(i => i.HasPermission(PermissionKind.IsAdministrator));
             this.firstAdminId = this.firstAdmin.Id;
+            this.db = new MetaDb(this.libraryManager);
+
             this.logger.LogInformation("PlaylistRebuildTask constructed");
         }
 
@@ -145,7 +148,7 @@ namespace Jellyfin.Plugin.MixFollower
                     var title = song.GetValue("title").ToString();
                     var artist = song.GetValue("artist").ToString();
 
-                    var item = this.GetMostMatchedSong(title, artist);
+                    var item = this.GetMostMatchedSong(title, artist) ?? this.GetMostMatchedSongWithLibrarySearch(title, artist);
                     if (item is null)
                     {
                         item = await this.DownloadMusic(title, artist).ConfigureAwait(false);
@@ -161,14 +164,10 @@ namespace Jellyfin.Plugin.MixFollower
                     var title = song.GetValue("title").ToString();
                     var artist = song.GetValue("artist").ToString();
 
-                    var item = this.GetMostMatchedSong(title, artist);
+                    var item = this.GetMostMatchedSong(title, artist) ?? this.GetMostMatchedSongWithLibrarySearch(title, artist);
                     if (item is null)
                     {
-                        item = this.GetMostMatchedSongWithLibrarySearch(title, artist);
-                        if (item is null)
-                        {
-                            continue;
-                        }
+                        continue;
                     }
 
                     list_items.Add(item.Id);
@@ -220,9 +219,8 @@ namespace Jellyfin.Plugin.MixFollower
         private Audio? GetMostMatchedSongWithLibrarySearch(string title, string artist)
         {
             this.logger.LogInformation("LibrarySearchQuerying with {Query}", title);
-            var db = new MetaDb(this.libraryManager);
-            db.RecreateDb();
-            var result = db.SearchByPath(title);
+            this.db.RecreateDb();
+            var result = this.db.SearchByFilename(title);
             var tokenized_artist = artist.Split(['(', ' ', ')']);
 
             this.logger.LogInformation("# of query results ( all music) : {Count}", result.Count());
