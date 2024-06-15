@@ -237,7 +237,8 @@ namespace Jellyfin.Plugin.MixFollower
                 this.logger.LogInformation("name {N} and path {Path}", song.Name, song.Path);
             });
             var song = result.Select(this.ConvertItemToAudio)
-            .Where(song => this.SubstrMetric(song, tokenized_artist))
+
+            // .Where(song => this.SubstrMetric(song, tokenized_artist))
             .FirstOrDefault();
             if (song is null)
             {
