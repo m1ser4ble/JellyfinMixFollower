@@ -229,13 +229,11 @@ namespace Jellyfin.Plugin.MixFollower
 
             var result = this.libraryManager.GetItemList(query);
             this.logger.LogInformation("# of query results ( all music) : {Count}", result.Count);
-            this.logger.LogInformation("The first item path : {Path}", result.FirstOrDefault().Path);
-            this.logger.LogInformation("The first item name : {Name}", result.FirstOrDefault().Name);
-            var trouble = result.Select(this.ConvertItemToAudio)
-            .Where(song => song.Name.Contains("SPOT!"))
-            .FirstOrDefault();
-            this.logger.LogInformation("Its name is {N} and Contains {C}", trouble.Name, trouble.Name.Contains(title));
 
+            result.Select(this.ConvertItemToAudio)
+            .ToList()
+            .ForEach(song => this.logger.LogInformation("name {N} and name contains {C}", song.Name, song.Name.Contains(title)));
+            return null;
             var song = result.Select(this.ConvertItemToAudio)
             .Where(song => this.SubstrMetric(song, tokenized_artist))
             .FirstOrDefault();
