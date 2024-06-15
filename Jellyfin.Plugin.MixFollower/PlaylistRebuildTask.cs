@@ -222,6 +222,7 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger.LogInformation("LibrarySearchQuerying with {Query}", title);
             var query = new InternalItemsQuery(this.firstAdmin)
             {
+                NameContains = title,
                 MediaTypes =[MediaType.Audio,],
             };
             var tokenized_artist = artist.Split(['(', ' ', ')']);
@@ -230,7 +231,7 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger.LogInformation("# of query results ( all music) : {Count}", result.Count);
             this.logger.LogInformation("The first item path : {Path}", result.FirstOrDefault().Path);
             this.logger.LogInformation("The first item name : {Name}", result.FirstOrDefault().Name);
-            return null;
+
             var song = result.Select(this.ConvertItemToAudio)
             .Where(song => this.SubstrMetric(song, tokenized_artist))
             .FirstOrDefault();
