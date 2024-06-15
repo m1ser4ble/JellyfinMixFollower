@@ -223,9 +223,10 @@ namespace Jellyfin.Plugin.MixFollower
             var expected_name = title.Split(' ').FirstOrDefault();
             var query = new InternalItemsQuery(this.firstAdmin)
             {
-                Name = expected_name,
+                NameContains = expected_name,
                 MediaTypes =[MediaType.Audio,],
             };
+            this.logger.LogInformation("Expected Name : {Exp}", expected_name);
             var tokenized_artist = artist.Split(['(', ' ', ')']);
 
             var result = this.libraryManager.GetItemList(query);
