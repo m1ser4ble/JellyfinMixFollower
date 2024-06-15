@@ -232,7 +232,15 @@ namespace Jellyfin.Plugin.MixFollower
 
             result.Select(this.ConvertItemToAudio)
             .ToList()
-            .ForEach(song => this.logger.LogInformation("name {N} and name contains {C}", song.Name, song.Name.Contains(title)));
+            .ForEach(song =>
+            {
+                if (song is null)
+                {
+                    return;
+                }
+
+                this.logger.LogInformation("name {N} and name contains {C}", song.Name, song.Name.Contains(title));
+            });
             return null;
             var song = result.Select(this.ConvertItemToAudio)
             .Where(song => this.SubstrMetric(song, tokenized_artist))
