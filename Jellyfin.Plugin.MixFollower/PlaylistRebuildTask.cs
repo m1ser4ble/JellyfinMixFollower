@@ -6,32 +6,24 @@ namespace Jellyfin.Plugin.MixFollower
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Globalization;
     using System.Linq;
-    using System.Reflection;
-    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using CliWrap;
     using CliWrap.Buffered;
     using Jellyfin.Data.Entities;
-    using Jellyfin.Data.Entities.Libraries;
     using Jellyfin.Data.Enums;
-    using MediaBrowser.Controller.Entities;
     using MediaBrowser.Controller.Entities.Audio;
     using MediaBrowser.Controller.Library;
     using MediaBrowser.Controller.Playlists;
-    using MediaBrowser.Controller.Providers;
-    using MediaBrowser.Model.Dto;
+
     using MediaBrowser.Model.Globalization;
     using MediaBrowser.Model.Playlists;
     using MediaBrowser.Model.Search;
     using MediaBrowser.Model.Tasks;
-    using Microsoft.AspNetCore.Components.Web;
-    using Microsoft.AspNetCore.Mvc;
+
     using Microsoft.Extensions.Logging;
-    using Microsoft.VisualBasic;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -117,12 +109,25 @@ namespace Jellyfin.Plugin.MixFollower
             var playlist = playlists.FirstOrDefault(playlist => playlist.Name == playlist_name);
             if (playlist is null)
             {
-                this.logger.LogInformation("there is no playlist {Name}", playlist_name);
                 return;
             }
 
             this.libraryManager.DeleteItem(playlist, new DeleteOptions { DeleteFileLocation = true }, true);
-            this.logger.LogInformation("matched and deleted ");
+            this.logger.LogInformation("matched and deleted {PN}", playlist_name);
+        }
+
+        private async Task<Audio?> GetMostMatchedSongFromJObject(JObject jobject, Func<string, string, Task<Audio?>>? action)
+        {
+            var title = jobject.GetValue("title").ToString();
+            var artist = jobject.GetValue("artist").ToString();
+
+            var item = this.GetMostMatchedSong(title, artist);
+            if (item is null && action is not null)
+            {
+                item = await action(title, artist).ConfigureAwait(false);
+            }
+
+            return item;
         }
 
         private async Task<string> CreatePlaylistFromFetchCommand(Guid user, string command)
@@ -143,35 +148,24 @@ namespace Jellyfin.Plugin.MixFollower
                 var songs = obj.GetValue("songs");
 
                 var list_items = new List<Guid>();
-                foreach (var song in songs.Children<JObject>())
-                {
-                    var title = song.GetValue("title").ToString();
-                    var artist = song.GetValue("artist").ToString();
-
-                    var item = this.GetMostMatchedSong(title, artist) ?? this.GetMostMatchedSongWithLibrarySearch(title, artist);
-                    if (item is null)
-                    {
-                        item = await this.DownloadMusic(title, artist).ConfigureAwait(false);
-                    }
-                }
+                songs.Children<JObject>()
+                .ToList()
+                .ForEach(async jobject => await this.GetMostMatchedSongFromJObject(jobject, this.DownloadMusic).ConfigureAwait(false));
 
                 // _iLibraryMonitor.ReportFileSystemChangeComplete(path, false);
                 await this.libraryManager.ValidateMediaLibrary(new Progress<double>(), CancellationToken.None).ConfigureAwait(false);
                 this.DeletePlaylist(playlist_name);
 
-                foreach (var song in songs.Children<JObject>())
+                songs.Children<JObject>()
+                .ToList()
+                .ForEach(async jobject =>
                 {
-                    var title = song.GetValue("title").ToString();
-                    var artist = song.GetValue("artist").ToString();
-
-                    var item = this.GetMostMatchedSong(title, artist) ?? this.GetMostMatchedSongWithLibrarySearch(title, artist);
-                    if (item is null)
+                    var item = await this.GetMostMatchedSongFromJObject(jobject, null).ConfigureAwait(false);
+                    if (item is not null)
                     {
-                        continue;
+                        list_items.Add(item.Id);
                     }
-
-                    list_items.Add(item.Id);
-                }
+                });
 
                 var playlist = await this.playlistManager.CreatePlaylist(new PlaylistCreationRequest
                 {
@@ -199,55 +193,6 @@ namespace Jellyfin.Plugin.MixFollower
             return string.Empty;
         }
 
-        private Audio? ConvertSearchHintInfoToAudio(SearchHintInfo hintInfo)
-        {
-            var item = hintInfo.Item;
-            return this.ConvertItemToAudio(item);
-        }
-
-        private Audio? ConvertItemToAudio(BaseItem item)
-        {
-            switch (item)
-            {
-                case Audio song:
-                    return song;
-                default:
-                    return null;
-            }
-        }
-
-        private Audio? GetMostMatchedSongWithLibrarySearch(string title, string artist)
-        {
-            this.logger.LogInformation("LibrarySearchQuerying with {Query}", title);
-            this.db.RecreateDb();
-            var result = this.db.SearchByFilename(title);
-            var tokenized_artist = artist.Split(['(', ' ', ')']);
-
-            this.logger.LogInformation("# of query results ( all music) : {Count}", result.Count());
-
-            result.Select(this.ConvertItemToAudio)
-            .ToList()
-            .ForEach(song =>
-            {
-                if (song is null)
-                {
-                    return;
-                }
-
-                this.logger.LogInformation("name {N} and path {Path}", song.Name, song.Path);
-            });
-            var song = result.Select(this.ConvertItemToAudio)
-
-            // .Where(song => this.SubstrMetric(song, tokenized_artist))
-            .FirstOrDefault();
-            if (song is null)
-            {
-                this.logger.LogInformation("even LibrarySearch failed...");
-            }
-
-            return song;
-        }
-
         private bool SubstrMetric(Audio? song, string[] tokenized_artist)
         {
             if (song is null)
@@ -255,13 +200,12 @@ namespace Jellyfin.Plugin.MixFollower
                 return false;
             }
 
-            var contains = (string a) =>
+            bool ContainsToken(string a)
             {
-                return tokenized_artist.Any(token => a.Contains(token, StringComparison.OrdinalIgnoreCase) || a.Contains(token, StringComparison.OrdinalIgnoreCase));
+                return tokenized_artist.Any(token => a.Contains(token, StringComparison.InvariantCulture) || a.Contains(token, StringComparison.InvariantCulture));
+            }
 
-                // this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
-            };
-            var result = song.Artists.Any(contains);
+            var result = song.Artists.Any(ContainsToken);
             if (!result)
             {
                 var join = string.Join(' ', tokenized_artist);
@@ -284,15 +228,26 @@ namespace Jellyfin.Plugin.MixFollower
             });
 
             var song = hints.Items
-            .Select(this.ConvertSearchHintInfoToAudio)
+            .Select(hint => hint.Item is Audio song ? song : null)
             .Where(song => this.SubstrMetric(song, tokenized_artist))
-            /*song =>
-            song is not null &&
-            song.Artists.Any(song_artist => song_artist.Contains(artist) || artist.Contains(song_artist))*/
             .FirstOrDefault();
+
             if (song is null)
             {
-                this.logger.LogInformation("Query failed with artist {Artist}", artist);
+                var result = this.db.SearchByFilename(title);
+                if (result.Count() != 1)
+                {
+                    this.logger.LogInformation("# of query results : {Count} ({Title}, {Artist})", result.Count(), title, artist);
+                }
+
+                song = result.Select(item => item is Audio song ? song : null)
+
+                // .Where(song => this.SubstrMetric(song, tokenized_artist)) // we have to solve beyonce problem
+                .FirstOrDefault();
+                if (song is null)
+                {
+                    this.logger.LogInformation("even LibrarySearch failed with artist {Artist}...", artist);
+                }
             }
 
             return song;
@@ -324,10 +279,6 @@ namespace Jellyfin.Plugin.MixFollower
                 try
                 {
                     var success = await this.DownloadMusicFromSource(source, title, artist).ConfigureAwait(false);
-                    if (success)
-                    {
-                        return this.GetMostMatchedSong(title, artist);
-                    }
                 }
                 catch (OperationCanceledException)
                 {
