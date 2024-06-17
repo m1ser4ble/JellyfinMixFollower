@@ -35,12 +35,13 @@ public class MetaDb
     /// <returns></returns>
     public IEnumerable<BaseItem> SearchByPath(string path)
     {
-        return this.db.Where(song => song.Path.Contains(path, StringComparison.OrdinalIgnoreCase));
+        return this.db.Where(song => song is not null && song.Path.Contains(path, StringComparison.OrdinalIgnoreCase));
     }
 
     public IEnumerable<BaseItem> SearchByFilename(string filename)
     {
-        return this.db.Where(song =>
-            song.FileNameWithoutExtension.Contains(filename, StringComparison.OrdinalIgnoreCase));
+        return this.db
+        .Where(song =>
+            song is not null && song.FileNameWithoutExtension.Contains(filename, StringComparison.OrdinalIgnoreCase));
     }
 }
