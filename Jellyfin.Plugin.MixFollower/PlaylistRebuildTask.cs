@@ -146,7 +146,7 @@ namespace Jellyfin.Plugin.MixFollower
                 string playlist_name = obj.GetValue("name").ToString();
 
                 var songs = obj.GetValue("songs");
-
+                this.db.RecreateDb();
                 var list_items = new List<Guid>();
                 songs.Children<JObject>()
                 .ToList()
