@@ -155,6 +155,7 @@ namespace Jellyfin.Plugin.MixFollower
                 // _iLibraryMonitor.ReportFileSystemChangeComplete(path, false);
                 await this.libraryManager.ValidateMediaLibrary(new Progress<double>(), CancellationToken.None).ConfigureAwait(false);
                 this.DeletePlaylist(playlist_name);
+                this.db.RecreateDb();
 
                 songs.Children<JObject>()
                 .ToList()
