@@ -112,12 +112,15 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger.LogInformation("ExecuteAsync");
             cancellationToken.ThrowIfCancellationRequested();
 
-            var commands_to_fetch = Plugin.Instance?.Configuration.CommandsToFetch;
+            var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
 
             this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
-            commands_to_fetch.ForEach((command) => this.logger.LogInformation("each command {Command}", command));
 
-            commands_to_fetch.ForEach(async command => await this.CreatePlaylistFromFetchCommand(this.firstAdminId, command).ConfigureAwait(false));
+            foreach (var command in commands_to_fetch)
+            {
+                this.logger.LogInformation("command {Command} Executing", command);
+                await this.CreatePlaylistFromFetchCommand(this.firstAdminId, command).ConfigureAwait(false);
+            }
         }
 
         private void DeletePlaylist(string playlist_name)
@@ -135,8 +138,8 @@ namespace Jellyfin.Plugin.MixFollower
 
         private async Task<Audio?> GetMostMatchedSongFromJObject(JObject jobject, Func<string, string, Task<Audio?>>? action)
         {
-            var title = jobject.GetValue("title").ToString();
-            var artist = jobject.GetValue("artist").ToString();
+            var title = jobject?.GetValue("title")?.ToString()!;
+            var artist = jobject?.GetValue("artist")?.ToString()!;
 
             var item = this.GetMostMatchedSong(title, artist);
             if (item is null && action is not null)
@@ -160,12 +163,12 @@ namespace Jellyfin.Plugin.MixFollower
 
                 var obj = JObject.Parse(json);
 
-                var playlist_name = obj.GetValue("name").ToString();
+                var playlist_name = obj?.GetValue("name")?.ToString()!;
 
-                var songs = obj.GetValue("songs");
+                var songs = obj?.GetValue("songs");
                 this.db.RecreateDb();
                 var list_items = new List<Guid>();
-                songs.Children<JObject>()
+                songs?.Children<JObject>()
                 .ToList()
                 .ForEach(async jobject => await this.GetMostMatchedSongFromJObject(jobject, this.DownloadMusic).ConfigureAwait(false));
 
@@ -174,7 +177,7 @@ namespace Jellyfin.Plugin.MixFollower
                 this.DeletePlaylist(playlist_name);
                 this.db.RecreateDb();
 
-                songs.Children<JObject>()
+                songs?.Children<JObject>()
                 .ToList()
                 .ForEach(async jobject =>
                 {
@@ -205,7 +208,7 @@ namespace Jellyfin.Plugin.MixFollower
             catch (Exception exception)
             {
                 this.logger.LogInformation("executing {command} gets crash! {msg} ", command, exception.Message);
-                this.logger.LogInformation("{stack_trace}", exception.StackTrace.ToString());
+                this.logger.LogInformation("{stack_trace}", exception.StackTrace?.ToString());
             }
 
             return string.Empty;
