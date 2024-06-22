@@ -1,4 +1,4 @@
-// <copyright file="PlaylistRebuildTask.cs" company="PlaceholderCompany">
+﻿// <copyright file="PlaylistRebuildTask.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -6,6 +6,7 @@ namespace Jellyfin.Plugin.MixFollower
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Immutable;
     using System.Globalization;
     using System.Linq;
     using System.Threading;
@@ -42,7 +43,7 @@ namespace Jellyfin.Plugin.MixFollower
         private readonly ILocalizationManager localization;
         private readonly ILogger<PlaylistRebuildTask> logger;
 
-        private MetaDb db;
+        private readonly MetaDb db;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaylistRebuildTask" /> class.
@@ -111,7 +112,7 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger.LogInformation("ExecuteAsync");
             cancellationToken.ThrowIfCancellationRequested();
 
-            var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
+            var commands_to_fetch = Plugin.Instance?.Configuration.CommandsToFetch;
 
             this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
             commands_to_fetch.ForEach((command) => this.logger.LogInformation("each command {Command}", command));
@@ -155,11 +156,11 @@ namespace Jellyfin.Plugin.MixFollower
                 result = await Cli.Wrap(command).ExecuteBufferedAsync().ConfigureAwait(false);
 
                 // result.ToString();
-                string json = result.StandardOutput.ToString();
+                var json = result.StandardOutput.ToString();
 
-                JObject obj = JObject.Parse(json);
+                var obj = JObject.Parse(json);
 
-                string playlist_name = obj.GetValue("name").ToString();
+                var playlist_name = obj.GetValue("name").ToString();
 
                 var songs = obj.GetValue("songs");
                 this.db.RecreateDb();
@@ -238,9 +239,10 @@ namespace Jellyfin.Plugin.MixFollower
         {
             this.logger.LogInformation("Querying with {Query}...", title);
             var tokenized_artist = artist.Split(['(', ' ', ')']);
+            MediaType[] audioTypes = [MediaType.Audio];
             var hints = this.searchEngine.GetSearchHints(new SearchQuery()
             {
-                MediaTypes =[MediaType.Audio],
+                MediaTypes = audioTypes,
                 SearchTerm = title,
             });
 
@@ -270,7 +272,7 @@ namespace Jellyfin.Plugin.MixFollower
             return song;
         }
 
-        private async Task<bool> DownloadMusicFromSource(string source, string title, string artist)
+        private static async Task<bool> DownloadMusicFromSource(string source, string title, string artist)
         {
             if (source.StartsWith("https"))
             {
@@ -295,7 +297,7 @@ namespace Jellyfin.Plugin.MixFollower
             {
                 try
                 {
-                    var success = await this.DownloadMusicFromSource(source, title, artist).ConfigureAwait(false);
+                    var success = await DownloadMusicFromSource(source, title, artist).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

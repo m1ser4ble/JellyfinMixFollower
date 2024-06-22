@@ -1,4 +1,4 @@
-// <copyright file="MetaDb.cs" company="PlaceholderCompany">
+﻿// <copyright file="MetaDb.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -10,7 +10,7 @@ namespace Jellyfin.Plugin.MixFollower;
 
 public class MetaDb
 {
-    private ILibraryManager libraryManager;
+    private readonly ILibraryManager libraryManager;
     private IReadOnlyList<BaseItem> db;
 
     /// <summary>
@@ -30,7 +30,7 @@ public class MetaDb
     {
         var query = new InternalItemsQuery()
         {
-            MediaTypes =[MediaType.Audio],
+            MediaTypes = [MediaType.Audio],
         };
         var result = this.libraryManager.QueryItems(query);
         this.db = result.Items;

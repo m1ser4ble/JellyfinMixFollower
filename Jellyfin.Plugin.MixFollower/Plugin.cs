@@ -1,9 +1,7 @@
-// <copyright file="Plugin.cs" company="PlaceholderCompany">
+﻿// <copyright file="Plugin.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Jellyfin.Plugin.MixFollower.Configuration;
 using MediaBrowser.Common.Configuration;
