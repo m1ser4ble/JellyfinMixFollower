@@ -37,7 +37,7 @@ jobs:
       with:
         version: "0.0.0.9000"
         verbosity: debug
-        path: .
+        path: Jellyfin.Plugin.MixFollower
         dotnet-target: "net8.0"
         output: _dist
     - name: Prepare GitHub Release assets
