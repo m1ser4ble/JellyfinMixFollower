@@ -23,7 +23,7 @@ jobs:
     - name: "Flag as nightly in build.yaml"
       uses: fjogeleit/yaml-update-action@main
       with:
-        valueFile: 'build.yaml'
+        valueFile: 'Jellyfin.Plugin.MixFollower/build.yaml'
         propertyPath: 'version'
         masterBranchName: release-feature
         targetBranch: release-feature
