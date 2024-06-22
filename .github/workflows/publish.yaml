@@ -25,6 +25,8 @@ jobs:
       with:
         valueFile: 'build.yaml'
         propertyPath: 'version'
+        masterBranchName: master
+        targetBranch: release-feature
         value: "0.0.0.9000"
         commitChange: false
         updateFile: true
