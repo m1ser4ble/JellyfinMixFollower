@@ -27,6 +27,7 @@ jobs:
         propertyPath: 'version'
         masterBranchName: release-feature
         targetBranch: release-feature
+        branch: release-feature
         value: "0.0.0.9000"
         commitChange: false
         updateFile: true
