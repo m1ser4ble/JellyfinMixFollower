@@ -2,7 +2,7 @@ name: Publish Nightly
 
 on:
   push:
-    branches: [ release-feature ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -25,9 +25,6 @@ jobs:
       with:
         valueFile: 'Jellyfin.Plugin.MixFollower/build.yaml'
         propertyPath: 'version'
-        masterBranchName: release-feature
-        targetBranch: release-feature
-        branch: release-feature
         value: "0.0.0.9000"
         commitChange: false
         updateFile: true
