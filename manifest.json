@@ -1,0 +1,20 @@
+[
+  {
+      "category": "Music",
+      "description": "This plugin allows users to sign in through an SSO provider (such as Google, Facebook, or your own provider). This enables one-click signin.\nReview documentation at https://github.com/9p4/jellyfin-plugin-sso\n",
+      "guid": "be9032e5-518d-4738-8a64-abe9e3c67ebd",
+      "name": "Mix Follower",
+      "overview": "Construct Playlists by using designated tools.",
+      "owner": "m1ser4ble",
+      "versions": [
+  {
+  "changelog": "Nightly build\n",
+  "checksum": "4af010249a6bdfa51ec961d3c7e6067a",
+  "sourceUrl": "https://github.com/m1ser4ble/JellyfinMixFollower/r",
+  "targetAbi": "10.9.0.0",
+  "timestamp": "2022-07-01T01:20:33Z",
+  "version": "0.0.0.9000"
+}
+]
+}
+]
