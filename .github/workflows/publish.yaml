@@ -23,7 +23,7 @@ jobs:
     - name: "Flag as nightly in build.yaml"
       uses: fjogeleit/yaml-update-action@main
       with:
-        valueFile: 'Jellyfin.Plugin.MixFollower/build.yaml'
+        valueFile: 'build.yaml'
         propertyPath: 'version'
         value: "0.0.0.9000"
         commitChange: false
@@ -55,7 +55,7 @@ jobs:
           tag_name: nightly
           files: |
             _dist/*
-            Jellyfin.Plugin.MixFollower/build.yaml
+            build.yaml
           body: |
             Nightly build
       env:
