@@ -1,0 +1,17 @@
+name: "Mix Follower"
+guid: "be9032e5-518d-4738-8a64-abe9e3c67ebd"
+imageUrl: "https://raw.githubusercontent.com/m1ser4ble/JellyfinMixFollower/release-feature/img/logo.png"
+version: "0.0.0.1"
+targetAbi: "10.9.2"
+framework: "net8.0"
+owner: "m1ser4ble"
+overview: "Construct Playlists by using designated tools."
+description: |
+  This plugin periodically execute pre-defined commands which querying music charts.
+  Based on your jellyfin-repo, it constructs playlists by the fetched charts.
+  If you have any downloader and register it in advance, the missing songs will be downloaded automatically.
+category: "Music"
+artifacts:
+  - "Jellyfin.Plugin.MixFollower.dll"
+changelog: |
+  0.0.0.1: Initial Release

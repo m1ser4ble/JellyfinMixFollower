@@ -1,4 +1,4 @@
-// <copyright file="PlaylistRebuildTask.cs" company="PlaceholderCompany">
+﻿// <copyright file="PlaylistRebuildTask.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -6,29 +6,24 @@ namespace Jellyfin.Plugin.MixFollower
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
+    using System.Collections.Immutable;
     using System.Globalization;
     using System.Linq;
-    using System.Reflection;
-    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using CliWrap;
     using CliWrap.Buffered;
-    using Jellyfin.Data.Entities.Libraries;
+    using Jellyfin.Data.Entities;
     using Jellyfin.Data.Enums;
-    using MediaBrowser.Controller.Entities;
     using MediaBrowser.Controller.Entities.Audio;
     using MediaBrowser.Controller.Library;
     using MediaBrowser.Controller.Playlists;
-    using MediaBrowser.Controller.Providers;
-    using MediaBrowser.Model.Dto;
+
     using MediaBrowser.Model.Globalization;
     using MediaBrowser.Model.Playlists;
     using MediaBrowser.Model.Search;
     using MediaBrowser.Model.Tasks;
-    using Microsoft.AspNetCore.Components.Web;
-    using Microsoft.AspNetCore.Mvc;
+
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
 
@@ -38,6 +33,8 @@ namespace Jellyfin.Plugin.MixFollower
     public class PlaylistRebuildTask : IScheduledTask, IConfigurableScheduledTask
     {
         private readonly Guid firstAdminId;
+
+        private readonly User firstAdmin;
         private readonly ILibraryManager libraryManager;
         private readonly IPlaylistManager playlistManager;
         private readonly IUserManager userManager;
@@ -45,6 +42,8 @@ namespace Jellyfin.Plugin.MixFollower
 
         private readonly ILocalizationManager localization;
         private readonly ILogger<PlaylistRebuildTask> logger;
+
+        private readonly MetaDb db;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaylistRebuildTask" /> class.
@@ -62,8 +61,10 @@ namespace Jellyfin.Plugin.MixFollower
             this.logger = logger;
             this.localization = localization;
             this.searchEngine = searchEngine;
-            this.firstAdminId = this.userManager.Users
-                .First(i => i.HasPermission(PermissionKind.IsAdministrator)).Id;
+            this.firstAdmin = this.userManager.Users.First(i => i.HasPermission(PermissionKind.IsAdministrator));
+            this.firstAdminId = this.firstAdmin.Id;
+            this.db = new MetaDb(this.libraryManager);
+
             this.logger.LogInformation("PlaylistRebuildTask constructed");
         }
 
@@ -105,18 +106,48 @@ namespace Jellyfin.Plugin.MixFollower
             };
         }
 
+        /// <inheritdoc />
+        public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+        {
+            this.logger.LogInformation("ExecuteAsync");
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
+
+            this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
+
+            foreach (var command in commands_to_fetch)
+            {
+                this.logger.LogInformation("command {Command} Executing", command);
+                await this.CreatePlaylistFromFetchCommand(this.firstAdminId, command).ConfigureAwait(false);
+            }
+        }
+
         private void DeletePlaylist(string playlist_name)
         {
             var playlists = this.playlistManager.GetPlaylists(this.firstAdminId);
             var playlist = playlists.FirstOrDefault(playlist => playlist.Name == playlist_name);
             if (playlist is null)
             {
-                this.logger.LogInformation("there is no playlist {Name}", playlist_name);
                 return;
             }
 
             this.libraryManager.DeleteItem(playlist, new DeleteOptions { DeleteFileLocation = true }, true);
-            this.logger.LogInformation("matched and deleted ");
+            this.logger.LogInformation("matched and deleted {PN}", playlist_name);
+        }
+
+        private async Task<Audio?> GetMostMatchedSongFromJObject(JObject jobject, Func<string, string, Task<Audio?>>? action)
+        {
+            var title = jobject?.GetValue("title")?.ToString()!;
+            var artist = jobject?.GetValue("artist")?.ToString()!;
+
+            var item = this.GetMostMatchedSong(title, artist);
+            if (item is null && action is not null)
+            {
+                item = await action(title, artist).ConfigureAwait(false);
+            }
+
+            return item;
         }
 
         private async Task<string> CreatePlaylistFromFetchCommand(Guid user, string command)
@@ -128,36 +159,34 @@ namespace Jellyfin.Plugin.MixFollower
                 result = await Cli.Wrap(command).ExecuteBufferedAsync().ConfigureAwait(false);
 
                 // result.ToString();
-                string json = result.StandardOutput.ToString();
+                var json = result.StandardOutput.ToString();
 
-                JObject obj = JObject.Parse(json);
+                var obj = JObject.Parse(json);
 
-                string playlist_name = obj.GetValue("name").ToString();
+                var playlist_name = obj?.GetValue("name")?.ToString()!;
 
-                var songs = obj.GetValue("songs");
-
+                var songs = obj?.GetValue("songs");
+                this.db.RecreateDb();
                 var list_items = new List<Guid>();
-                foreach (var song in songs.Children<JObject>())
-                {
-                    var title = song.GetValue("title").ToString();
-                    var artist = song.GetValue("artist").ToString();
-
-                    var item = this.GetMostMatchedSong(title, artist);
-                    if (item is null)
-                    {
-                        item = await this.DownloadMusic(title, artist).ConfigureAwait(false);
-                        continue;
-                    }
-
-                    list_items.Add(item.Id);
-                }
-
-                IProgress<double> progress;
-                CancellationToken cancellationToken;
+                songs?.Children<JObject>()
+                .ToList()
+                .ForEach(async jobject => await this.GetMostMatchedSongFromJObject(jobject, this.DownloadMusic).ConfigureAwait(false));
 
                 // _iLibraryMonitor.ReportFileSystemChangeComplete(path, false);
-                // libraryManager.ValidateMediaLibraryInternal(progress, cancellationToken);
+                await this.libraryManager.ValidateMediaLibrary(new Progress<double>(), CancellationToken.None).ConfigureAwait(false);
                 this.DeletePlaylist(playlist_name);
+                this.db.RecreateDb();
+
+                songs?.Children<JObject>()
+                .ToList()
+                .ForEach(async jobject =>
+                {
+                    var item = await this.GetMostMatchedSongFromJObject(jobject, null).ConfigureAwait(false);
+                    if (item is not null)
+                    {
+                        list_items.Add(item.Id);
+                    }
+                });
 
                 var playlist = await this.playlistManager.CreatePlaylist(new PlaylistCreationRequest
                 {
@@ -179,59 +208,74 @@ namespace Jellyfin.Plugin.MixFollower
             catch (Exception exception)
             {
                 this.logger.LogInformation("executing {command} gets crash! {msg} ", command, exception.Message);
-                this.logger.LogInformation("{stack_trace}", exception.StackTrace.ToString());
+                this.logger.LogInformation("{stack_trace}", exception.StackTrace?.ToString());
             }
 
             return string.Empty;
         }
 
-        private Audio? ConvertSearchHintInfoToAudio(SearchHintInfo hintInfo)
+        private bool SubstrMetric(Audio? song, string[] tokenized_artist)
         {
-            var item = hintInfo.Item;
-            switch (item)
+            if (song is null)
             {
-                case Audio song:
-                    return song;
-                default:
-                    return null;
+                return false;
             }
+
+            bool ContainsToken(string a)
+            {
+                return tokenized_artist.Any(token => a.Contains(token, StringComparison.InvariantCulture) || a.Contains(token, StringComparison.InvariantCulture));
+            }
+
+            var result = song.Artists.Any(ContainsToken);
+            if (!result)
+            {
+                var join = string.Join(' ', tokenized_artist);
+                this.logger.LogInformation("I want artist {Joined}", join);
+                this.logger.LogInformation("song artists...");
+                song.Artists.ToList().ForEach(a => this.logger.LogInformation("Artist : {A}", a));
+            }
+
+            return result;
         }
 
         private Audio? GetMostMatchedSong(string title, string artist)
         {
-            bool hellnback = title == "Hell N Back" ? true : false;
+            this.logger.LogInformation("Querying with {Query}...", title);
+            var tokenized_artist = artist.Split(['(', ' ', ')']);
+            MediaType[] audioTypes = [MediaType.Audio];
             var hints = this.searchEngine.GetSearchHints(new SearchQuery()
             {
-                MediaTypes =[MediaType.Audio],
+                MediaTypes = audioTypes,
                 SearchTerm = title,
             });
-            var lambda = (Audio? song) =>
+
+            var song = hints.Items
+            .Select(hint => hint.Item is Audio song ? song : null)
+            .Where(song => this.SubstrMetric(song, tokenized_artist))
+            .FirstOrDefault();
+
+            if (song is null)
             {
-                if (song is null)
+                var result = this.db.SearchByFilename(title);
+                if (result.Count() != 1)
                 {
-                    return false;
+                    this.logger.LogInformation("# of query results : {Count} ({Title}, {Artist})", result.Count(), title, artist);
                 }
 
-                var contains = (string a) =>
+                song = result.Select(item => item is Audio song ? song : null)
+
+                // .Where(song => this.SubstrMetric(song, tokenized_artist)) // we have to solve beyonce problem
+                .FirstOrDefault();
+                if (song is null)
                 {
-                    this.logger.LogInformation("searchResult artist : {A} vs {Find}", a, artist);
-                    return a.Contains(artist) || artist.Contains(a);
-                };
-                var result = song.Artists.Any(contains);
+                    this.logger.LogInformation("even LibrarySearch failed with artist {Artist}...", artist);
+                }
+            }
 
-                return result;
-            };
-
-            return hints.Items
-            .Select(this.ConvertSearchHintInfoToAudio)
-            .Where(lambda)
-            /*song =>
-            song is not null &&
-            song.Artists.Any(song_artist => song_artist.Contains(artist) || artist.Contains(song_artist))*/
-            .FirstOrDefault();
+            return song;
         }
 
-        private async Task<bool> DownloadMusicFromSource(string source, string title, string artist)
+        private static async Task<bool> DownloadMusicFromSource(string source, string title, string artist)
         {
             if (source.StartsWith("https"))
             {
@@ -256,11 +300,7 @@ namespace Jellyfin.Plugin.MixFollower
             {
                 try
                 {
-                    var success = await this.DownloadMusicFromSource(source, title, artist).ConfigureAwait(false);
-                    if (success)
-                    {
-                        return this.GetMostMatchedSong(title, artist);
-                    }
+                    var success = await DownloadMusicFromSource(source, title, artist).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -273,20 +313,6 @@ namespace Jellyfin.Plugin.MixFollower
             }
 
             return null;
-        }
-
-        /// <inheritdoc />
-        public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
-        {
-            this.logger.LogInformation("ExecuteAsync");
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
-
-            this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
-            commands_to_fetch.ForEach((command) => this.logger.LogInformation("each command {Command}", command));
-
-            commands_to_fetch.ForEach(async command => await this.CreatePlaylistFromFetchCommand(this.firstAdminId, command).ConfigureAwait(false));
         }
     }
 }

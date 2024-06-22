@@ -1,27 +1,10 @@
-// <copyright file="PluginConfiguration.cs" company="PlaceholderCompany">
+﻿// <copyright file="PluginConfiguration.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using CliWrap;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.MixFollower.Configuration;
-
-/// <summary>
-/// The configuration options.
-/// </summary>
-public enum SomeOptions
-{
-    /// <summary>
-    /// Option one.
-    /// </summary>
-    OneOption,
-
-    /// <summary>
-    /// Second option.
-    /// </summary>
-    AnotherOption,
-}
 
 /// <summary>
 /// Plugin configuration.
@@ -34,8 +17,8 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         // set default options here
-        this.ApisDownload = new List<string>();
-        this.CommandsToFetch = new List<string>();
+        this.apiDownload = [];
+        this.commandsToFetch = [];
     }
 
     /// <summary>
@@ -43,21 +26,16 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public bool TrueFalseSetting { get; set; }
 
-    private List<string> apiDownload;
-
     /// <summary>
     /// Gets or sets api for downloading missing songs in my library.
     /// </summary>
     public List<string> ApisDownload
     {
         get => this.apiDownload;
-        set
-        {
-            this.apiDownload = value.Where((source) => !string.IsNullOrEmpty(source)).ToList();
-        }
+        set => this.apiDownload = (value ?? []).Where((source) => !string.IsNullOrEmpty(source)).ToList();
     }
 
-    private List<string> commandsToFetch;
+    private List<string> apiDownload;
 
     /// <summary>
     /// Gets or sets linux commands to fetch
@@ -66,14 +44,8 @@ public class PluginConfiguration : BasePluginConfiguration
     public List<string> CommandsToFetch
     {
         get => this.commandsToFetch;
-        set
-        {
-            this.commandsToFetch = value.Where((command) => !string.IsNullOrEmpty(command)).ToList();
-        }
+        set => this.commandsToFetch = (value ?? []).Where((command) => !string.IsNullOrEmpty(command)).ToList();
     }
 
-    /// <summary>
-    /// Gets or sets an enum option.
-    /// </summary>
-    public SomeOptions Options { get; set; }
+    private List<string> commandsToFetch;
 }

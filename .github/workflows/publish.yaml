@@ -1,0 +1,70 @@
+name: Publish Nightly
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build Dotnet
+      run: dotnet build --no-restore --warnaserror
+    - name: "Flag as nightly in build.yaml"
+      uses: fjogeleit/yaml-update-action@main
+      with:
+        valueFile: 'Jellyfin.Plugin.MixFollower/build.yaml'
+        propertyPath: 'version'
+        value: "0.0.0.9000"
+        commitChange: false
+        updateFile: true
+    - name: "JPRM: Build"
+      id: jrpm
+      uses: oddstr13/jellyfin-plugin-repository-manager@v1.1.0
+      with:
+        version: "0.0.0.9000"
+        verbosity: debug
+        path: Jellyfin.Plugin.MixFollower
+        dotnet-target: "net8.0"
+        output: _dist
+    - name: Prepare GitHub Release assets
+      run: |-
+        pushd _dist
+        for file in ./*.zip; do
+          md5sum ${file#./} >> ${file%.*}.md5
+          sha256sum ${file#./} >> ${file%.*}.sha256
+        done
+        ls -l
+        popd
+    - name: Publish output artifacts
+      id: publish-assets
+      uses: softprops/action-gh-release@v2
+      with:
+          prerelease: false
+          fail_on_unmatched_files: true
+          tag_name: nightly
+          files: |
+            _dist/*
+            Jellyfin.Plugin.MixFollower/build.yaml
+          body: |
+            Nightly build
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish Plugin Manifest
+      uses: Kevinjil/jellyfin-plugin-repo-action@v0.4.0
+      with:
+        ignorePrereleases: true
+        githubToken: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        pagesBranch: manifest-release
+        pagesFile: manifest.json

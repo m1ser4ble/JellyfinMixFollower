@@ -2,8 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Jellyfin.Plugin.MixFollower.Configuration;
 using MediaBrowser.Common.Configuration;
@@ -35,7 +33,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <summary>
     /// Gets the current plugin instance.
     /// </summary>
-    public static Plugin? Instance { get; private set; }
+    public static Plugin Instance { get; private set; } = null!;
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
