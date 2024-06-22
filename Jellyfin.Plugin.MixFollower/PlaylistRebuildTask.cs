@@ -32,7 +32,7 @@ namespace Jellyfin.Plugin.MixFollower
     public class PlaylistRebuildTask : IScheduledTask, IConfigurableScheduledTask
     {
         private readonly Guid firstAdminId;
-        private MetaDb db;
+
         private readonly User firstAdmin;
         private readonly ILibraryManager libraryManager;
         private readonly IPlaylistManager playlistManager;
@@ -41,6 +41,8 @@ namespace Jellyfin.Plugin.MixFollower
 
         private readonly ILocalizationManager localization;
         private readonly ILogger<PlaylistRebuildTask> logger;
+
+        private MetaDb db;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaylistRebuildTask" /> class.
@@ -101,6 +103,20 @@ namespace Jellyfin.Plugin.MixFollower
 
                 new TaskTriggerInfo { Type = TaskTriggerInfo.TriggerInterval, IntervalTicks = TimeSpan.FromHours(24).Ticks },
             };
+        }
+
+        /// <inheritdoc />
+        public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+        {
+            this.logger.LogInformation("ExecuteAsync");
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
+
+            this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
+            commands_to_fetch.ForEach((command) => this.logger.LogInformation("each command {Command}", command));
+
+            commands_to_fetch.ForEach(async command => await this.CreatePlaylistFromFetchCommand(this.firstAdminId, command).ConfigureAwait(false));
         }
 
         private void DeletePlaylist(string playlist_name)
@@ -292,20 +308,6 @@ namespace Jellyfin.Plugin.MixFollower
             }
 
             return null;
-        }
-
-        /// <inheritdoc />
-        public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
-        {
-            this.logger.LogInformation("ExecuteAsync");
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var commands_to_fetch = Plugin.Instance.Configuration.CommandsToFetch;
-
-            this.logger.LogInformation("commands_to_fetch size : {size}", commands_to_fetch.Count);
-            commands_to_fetch.ForEach((command) => this.logger.LogInformation("each command {Command}", command));
-
-            commands_to_fetch.ForEach(async command => await this.CreatePlaylistFromFetchCommand(this.firstAdminId, command).ConfigureAwait(false));
         }
     }
 }

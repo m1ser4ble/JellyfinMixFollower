@@ -2,26 +2,9 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using CliWrap;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.MixFollower.Configuration;
-
-/// <summary>
-/// The configuration options.
-/// </summary>
-public enum SomeOptions
-{
-    /// <summary>
-    /// Option one.
-    /// </summary>
-    OneOption,
-
-    /// <summary>
-    /// Second option.
-    /// </summary>
-    AnotherOption,
-}
 
 /// <summary>
 /// Plugin configuration.
@@ -35,7 +18,7 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         // set default options here
         this.ApisDownload = new List<string>();
-        this.CommandsToFetch = new List<string>();
+        this.CommandsToFetch =[];
     }
 
     /// <summary>
@@ -63,7 +46,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets linux commands to fetch
     /// e.g) python fetch_billboard.py.
     /// </summary>
-    public List<string> CommandsToFetch
+    public required List<string> CommandsToFetch
     {
         get => this.commandsToFetch;
         set
@@ -71,9 +54,4 @@ public class PluginConfiguration : BasePluginConfiguration
             this.commandsToFetch = value.Where((command) => !string.IsNullOrEmpty(command)).ToList();
         }
     }
-
-    /// <summary>
-    /// Gets or sets an enum option.
-    /// </summary>
-    public SomeOptions Options { get; set; }
 }

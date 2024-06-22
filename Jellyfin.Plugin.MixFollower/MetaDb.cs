@@ -13,11 +13,19 @@ public class MetaDb
     private ILibraryManager libraryManager;
     private IReadOnlyList<BaseItem> db;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MetaDb"/> class.
+    /// </summary>
+    /// <param name="libraryManager">library manager from jellyfin.</param>
     public MetaDb(ILibraryManager libraryManager)
     {
         this.libraryManager = libraryManager;
+        this.db = new List<BaseItem>();
     }
 
+    /// <summary>
+    /// Recreate _db based on the library state when called.
+    /// </summary>
     public void RecreateDb()
     {
         var query = new InternalItemsQuery()
@@ -29,15 +37,20 @@ public class MetaDb
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MetaDb"/> class.
+    /// Search songs containing a specific string in its path.
     /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
+    /// <param name="path">path name in the system.</param>
+    /// <returns>list of songs.</returns>
     public IEnumerable<BaseItem> SearchByPath(string path)
     {
         return this.db.Where(song => song is not null && song.Path.Contains(path, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// Search songs containing a specific string in its filename.
+    /// </summary>
+    /// <param name="filename">wanted file name.</param>
+    /// <returns>list of songs. </returns>
     public IEnumerable<BaseItem> SearchByFilename(string filename)
     {
         return this.db
