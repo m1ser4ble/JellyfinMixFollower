@@ -125,7 +125,9 @@ namespace Jellyfin.Plugin.MixFollower
             direct_assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("direct have types : {Types}", type.FullName));
 
             var assembly = plugin.GetType().Assembly;
-            assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("possbile  : {T}", type.FullName));
+            assembly.GetType("MediaBrowser.Common.Plugins.IPluginAssembly").Assembly.GetTypes().ToList()
+            .ForEach(type => logger.LogInformation("possbile  : {T}", type.FullName));
+
             if (assembly is null)
             {
                 logger.LogInformation("assembly is null...");
@@ -141,7 +143,20 @@ namespace Jellyfin.Plugin.MixFollower
 
             ///
             var getUser = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethod("GetUser", BindingFlags.Public | BindingFlags.Instance);
+            if (getUser is null)
+            {
+                logger.LogInformation("getUser is not null");
+            }
             var x = getUser.Invoke(null, [user]);
+            if (x is null)
+            {
+                logger.LogInformation("getUser result is null");
+            }
+            x.GetType().GetProperties().ToList().ForEach(property => logger.LogInformation("property : {P}", property.Name));
+            if (x.GetType().GetProperty("Username").GetValue(x) is null)
+            {
+                logger.LogInformation("cant get value ");
+            }
             string? username = x.GetType().GetProperty("Username").GetValue(x).ToString();
             this.logger.LogInformation("to {aa} , linked lastfm username is {Username}", user.Username, username);
             return username;
