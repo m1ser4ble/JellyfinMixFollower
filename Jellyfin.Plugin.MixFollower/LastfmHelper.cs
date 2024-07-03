@@ -120,6 +120,12 @@ namespace Jellyfin.Plugin.MixFollower
                 return null;
             }
             var assembly = plugin.GetType().Assembly;
+            if (assembly is null)
+            {
+                logger.LogInformation("assembly is null...");
+            }
+            assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("possible types : {Types}", type.Name));
+
             var methods = assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethods();
             methods.ToList().ForEach(method => this.logger.LogInformation("methodname : {Name}", method.Name));
 
