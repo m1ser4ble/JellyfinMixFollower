@@ -109,7 +109,12 @@ namespace Jellyfin.Plugin.MixFollower
             }
 
             var plugin = pluginManager.GetPlugin(this.LASTFM_GUID);
-            var assembly = plugin?.GetType().Assembly;
+            if (plugin is null)
+            {
+                logger.LogInformation("user {Username} does not link with lastfm", user.Username);
+                return null;
+            }
+            var assembly = plugin.GetType().Assembly;
             var methods = assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethods();
             methods.ToList().ForEach(method => this.logger.LogInformation("methodname : {Name}", method.Name));
 
