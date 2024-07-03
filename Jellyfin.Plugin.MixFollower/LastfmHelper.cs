@@ -126,7 +126,7 @@ namespace Jellyfin.Plugin.MixFollower
             {
                 logger.LogInformation("assembly is null...");
             }
-            pluginManager.Plugins.Select(plugin => plugin.)
+
             assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("possible types : {Types}", type.Name));
 
             var methods = assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethods();
