@@ -129,13 +129,11 @@ namespace Jellyfin.Plugin.MixFollower
                 logger.LogInformation("assembly is null...");
             }
 
-            assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("possible types : {Types}", type.Name));
-
-            var methods = assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethods();
+            var methods = direct_assembly.GetType("UserHelpers").GetMethods();
             methods.ToList().ForEach(method => this.logger.LogInformation("methodname : {Name}", method.Name));
 
             ///
-            var getUser = assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethod("GetUser", BindingFlags.Public | BindingFlags.Instance);
+            var getUser = direct_assembly.GetType("UserHelpers").GetMethod("GetUser", BindingFlags.Public | BindingFlags.Instance);
             var x = getUser?.Invoke(null, [user]);
             string? username = x?.GetType().GetProperty("Username").GetValue(x).ToString();
             this.logger.LogInformation("linked lastfm username is {Username}", username);
