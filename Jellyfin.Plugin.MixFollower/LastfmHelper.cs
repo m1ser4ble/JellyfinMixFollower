@@ -119,7 +119,9 @@ namespace Jellyfin.Plugin.MixFollower
                 logger.LogInformation("user {Username} does not link with lastfm", user.Username);
                 return null;
             }
-            plugin.DllFiles.ToList().ForEach(dll => logger.LogInformation("dll path : {Path}", dll));
+            var dll = plugin.DllFiles.FirstOrDefault();
+            var direct_assembly = Assembly.LoadFile(dll);
+            direct_assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("direct have types : {Types}", type.Name));
 
             var assembly = plugin.GetType().Assembly;
             if (assembly is null)
