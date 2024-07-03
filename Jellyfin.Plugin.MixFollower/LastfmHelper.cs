@@ -15,6 +15,7 @@ namespace Jellyfin.Plugin.MixFollower
     using MediaBrowser.Common.Plugins;
     using MediaBrowser.Controller.Library;
     using MediaBrowser.Model.Tasks;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualBasic;
     using Newtonsoft.Json.Linq;
@@ -121,7 +122,7 @@ namespace Jellyfin.Plugin.MixFollower
             }
             var dll = plugin.DllFiles.FirstOrDefault();
             var direct_assembly = Assembly.LoadFile(dll);
-            direct_assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("direct have types : {Types}", type.Name));
+            direct_assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("direct have types : {Types}", type.FullName));
 
             var assembly = plugin.GetType().Assembly;
             if (assembly is null)
@@ -129,6 +130,11 @@ namespace Jellyfin.Plugin.MixFollower
                 logger.LogInformation("assembly is null...");
             }
 
+            var type = direct_assembly.GetType("UserHelpers");
+            if (type is null)
+            {
+                logger.LogInformation("type is null.....bb");
+            }
             var methods = direct_assembly.GetType("UserHelpers").GetMethods();
             methods.ToList().ForEach(method => this.logger.LogInformation("methodname : {Name}", method.Name));
 
