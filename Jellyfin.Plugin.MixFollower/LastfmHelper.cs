@@ -142,7 +142,7 @@ namespace Jellyfin.Plugin.MixFollower
             methods.ToList().ForEach(method => this.logger.LogInformation("methodname : {Name}", method.Name));
 
             ///
-            var getUser = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethod("GetUser", BindingFlags.Public | BindingFlags.Instance);
+            var getUser = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethod("GetUser", new Type[] { typeof(User) });
             if (getUser is null)
             {
                 logger.LogInformation("getUser is not null");
