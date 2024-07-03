@@ -138,16 +138,13 @@ namespace Jellyfin.Plugin.MixFollower
             {
                 logger.LogInformation("type is null.....bb");
             }
+            var obj = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
+            var x = obj.GetType()
+            .GetMethod("GetUser", new Type[] { typeof(User) })
+            .Invoke(obj, new object[] { user });
             var methods = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethods();
             methods.ToList().ForEach(method => this.logger.LogInformation("methodname : {Name}", method.Name));
 
-            ///
-            var getUser = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethod("GetUser", new Type[] { typeof(User) });
-            if (getUser is null)
-            {
-                logger.LogInformation("getUser is not null");
-            }
-            var x = getUser.Invoke(null, [user]);
             if (x is null)
             {
                 logger.LogInformation("getUser result is null");
