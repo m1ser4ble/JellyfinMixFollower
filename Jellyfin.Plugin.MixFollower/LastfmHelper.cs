@@ -101,8 +101,13 @@ namespace Jellyfin.Plugin.MixFollower
             return plugin is not null;
         }
 
-        public string? GetLastfmUsernameFromUser(User user)
+        public string? GetLastfmUsernameFromUser(User? user)
         {
+            if (user is null)
+            {
+                logger.LogInformation("user is not specified");
+                return null;
+            }
             if (!IsLastfmPluginInstalled())
             {
                 return null;
