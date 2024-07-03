@@ -146,7 +146,7 @@ namespace Jellyfin.Plugin.MixFollower
                 logger.LogInformation("method is null");
             }
             var x = obj
-            .GetMethod("GetUser", new Type[] { typeof(User) })
+            .GetMethod("GetUser", BindingFlags.Static, new Type[] { typeof(User) })
             .Invoke(null, new object[] { user });
             var methods = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethods();
             methods.ToList().ForEach(method => this.logger.LogInformation("methodname : {Name}", method.Name));
