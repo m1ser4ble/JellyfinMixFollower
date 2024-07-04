@@ -141,7 +141,8 @@ namespace Jellyfin.Plugin.MixFollower
 
             if (x is null)
             {
-                logger.LogInformation("getUser result is null");
+                logger.LogInformation("getUser of {Username} result is null", user.Username);
+                return null;
             }
             x.GetType().GetProperties().ToList().ForEach(property => logger.LogInformation("property : {P}", property.Name));
             if (x.GetType().GetProperty("Username").GetValue(x) is null)
