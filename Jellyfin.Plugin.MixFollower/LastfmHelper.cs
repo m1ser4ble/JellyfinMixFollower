@@ -121,12 +121,14 @@ namespace Jellyfin.Plugin.MixFollower
                 return null;
             }
             var plugin_assembly = plugin.Instance.GetType().Assembly;
-            plugin_assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("instance has {Type}", type));
-            var dll = plugin.DllFiles.FirstOrDefault();
-            var direct_assembly = Assembly.LoadFile(dll);
+            //plugin_assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("instance has {Type}", type));
+            //var dll = plugin.DllFiles.FirstOrDefault();
+            //var direct_assembly = Assembly.LoadFile(dll);
 
 
-            var obj = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
+            //var obj = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
+            var obj = plugin_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
+
             var method = obj
             .GetMethod("GetUser", new Type[] { typeof(User) });
             if (method is null)
@@ -136,8 +138,6 @@ namespace Jellyfin.Plugin.MixFollower
             var x = obj
             .GetMethod("GetUser", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy, new Type[] { typeof(User) })
             .Invoke(null, new object[] { user });
-            var methods = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers").GetMethods();
-            methods.ToList().ForEach(method => this.logger.LogInformation("methodname : {Name}", method.Name));
 
             if (x is null)
             {
