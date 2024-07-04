@@ -122,22 +122,8 @@ namespace Jellyfin.Plugin.MixFollower
             }
             var dll = plugin.DllFiles.FirstOrDefault();
             var direct_assembly = Assembly.LoadFile(dll);
-            direct_assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("direct have types : {Types}", type.FullName));
 
-            var assembly = plugin.GetType().Assembly;
-            assembly.GetType("MediaBrowser.Common.Plugins.IPluginAssembly").Assembly.GetTypes().ToList()
-            .ForEach(type => logger.LogInformation("possbile  : {T}", type.FullName));
 
-            if (assembly is null)
-            {
-                logger.LogInformation("assembly is null...");
-            }
-
-            var type = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
-            if (type is null)
-            {
-                logger.LogInformation("type is null.....bb");
-            }
             var obj = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
             var method = obj
             .GetMethod("GetUser", new Type[] { typeof(User) });
@@ -229,6 +215,7 @@ namespace Jellyfin.Plugin.MixFollower
 
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
+            await Task.Delay(5000);
             if (IsLastfmPluginInstalled())
             {
                 await CreatePlaylistsFromLastfm().ConfigureAwait(false);
