@@ -177,7 +177,7 @@ namespace Jellyfin.Plugin.MixFollower
             var url = $"https://www.last.fm/player/station/user/{username}/recommended";
             HttpClient client = new HttpClient();
             var response = await client.GetAsync(url).ConfigureAwait(false);
-            this.logger.LogInformation("returned msg : \n {Msg} ", response.Content;
+            this.logger.LogInformation("returned msg : \n {Msg} ", response.Content);
             var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var mixfollower_formatted_data = new JObject();
             var lastfm_jobject = JObject.Parse(data);
