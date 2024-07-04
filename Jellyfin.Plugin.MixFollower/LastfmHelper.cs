@@ -166,6 +166,7 @@ namespace Jellyfin.Plugin.MixFollower
             var artist = string.Join(" ", artists_name_list);
             mixfollower_entry.Add("name", name);
             mixfollower_entry.Add("artist", artist);
+            logger.LogInformation("each entry made by {Name} , {Artist}", name, artist);
             return mixfollower_entry;
 
         }
@@ -176,7 +177,7 @@ namespace Jellyfin.Plugin.MixFollower
             var url = $"https://www.last.fm/player/station/user/{username}/recommended";
             HttpClient client = new HttpClient();
             var response = await client.GetAsync(url).ConfigureAwait(false);
-            this.logger.LogInformation("returned msg : \n {Msg} ", response);
+            this.logger.LogInformation("returned msg : \n {Msg} ", response.Content;
             var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var mixfollower_formatted_data = new JObject();
             var lastfm_jobject = JObject.Parse(data);
@@ -190,6 +191,7 @@ namespace Jellyfin.Plugin.MixFollower
             .ForEach(mixfollower_entry => songlist.Add(mixfollower_entry));
 
             mixfollower_formatted_data.Add("chart", songlist);
+            this.logger.LogInformation("formatted data: \n {Data}", mixfollower_formatted_data);
             return mixfollower_formatted_data;
 
         }
