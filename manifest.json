@@ -7,6 +7,14 @@
     "overview": "Construct Playlists by using designated tools.",
     "owner": "m1ser4ble",
     "versions": [
+      {
+        "changelog": "Nightly build\n",
+        "checksum": "b03c0f56f906c9291c7e41df9a9d24ba",
+        "sourceUrl": "https://github.com/m1ser4ble/JellyfinMixFollower/releases/download/nightly/mix-follower_0.0.0.9000.zip",
+        "targetAbi": "10.9.2",
+        "timestamp": "2024-06-22T09:05:53Z",
+        "version": "0.0.0.9000"
+      }
     ]
   }
 ]
