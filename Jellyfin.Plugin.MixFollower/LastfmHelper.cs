@@ -164,7 +164,7 @@ namespace Jellyfin.Plugin.MixFollower
             .Select(artist => artist.GetValue("_name").ToString())
             .ToList();
             var artist = string.Join(" ", artists_name_list);
-            mixfollower_entry.Add("name", name);
+            mixfollower_entry.Add("title", name);
             mixfollower_entry.Add("artist", artist);
             logger.LogInformation("each entry made by {Name} , {Artist}", name, artist);
             logger.LogInformation("produced entry : {Entry}", mixfollower_entry.ToString());
