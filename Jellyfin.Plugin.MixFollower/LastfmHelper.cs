@@ -167,6 +167,7 @@ namespace Jellyfin.Plugin.MixFollower
             mixfollower_entry.Add("name", name);
             mixfollower_entry.Add("artist", artist);
             logger.LogInformation("each entry made by {Name} , {Artist}", name, artist);
+            logger.LogInformation("produced entry : {Entry}", mixfollower_entry.ToString());
             return mixfollower_entry;
 
         }
@@ -191,7 +192,7 @@ namespace Jellyfin.Plugin.MixFollower
             .ForEach(mixfollower_entry => songlist.Add(mixfollower_entry));
 
             mixfollower_formatted_data.Add("chart", songlist);
-            this.logger.LogInformation("formatted data: \n {Data}", mixfollower_formatted_data);
+            this.logger.LogInformation("formatted data: \n {Data}", mixfollower_formatted_data.ToString());
             return mixfollower_formatted_data;
 
         }
