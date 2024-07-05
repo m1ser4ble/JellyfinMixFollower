@@ -9,7 +9,7 @@ JellyfinMixFollower only accept json data like below
 ```
 {
   "name" : "Billboard Hot 100™",
-  "chart" : [
+  "songs" : [
     {"title": "I Had Some Help", "artist": "Post Malone Featuring Morgan Wallen"},
     {"title", "", "artist": ""}
   ]
