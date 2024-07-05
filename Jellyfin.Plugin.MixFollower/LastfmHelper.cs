@@ -191,7 +191,7 @@ namespace Jellyfin.Plugin.MixFollower
             .ToList()
             .ForEach(mixfollower_entry => songlist.Add(mixfollower_entry));
 
-            mixfollower_formatted_data.Add("chart", songlist);
+            mixfollower_formatted_data.Add("songs", songlist);
             this.logger.LogInformation("formatted data: \n {Data}", mixfollower_formatted_data.ToString());
             return mixfollower_formatted_data;
 
