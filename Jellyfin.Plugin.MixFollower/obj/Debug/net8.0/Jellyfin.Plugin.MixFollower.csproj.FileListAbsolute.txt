@@ -1,0 +1,13 @@
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/Jellyfin.Plugin.MixFollower.csproj.AssemblyReference.cache
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/Jellyfin.Plugin.MixFollower.GeneratedMSBuildEditorConfig.editorconfig
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/Jellyfin.Plugin.MixFollower.AssemblyInfoInputs.cache
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/Jellyfin.Plugin.MixFollower.AssemblyInfo.cs
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/Jellyfin.Plugin.MixFollower.csproj.CoreCompileInputs.cache
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/Jellyfin.Plugin.MixFollower.sourcelink.json
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/bin/Debug/net8.0/Jellyfin.Plugin.MixFollower.deps.json
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/bin/Debug/net8.0/Jellyfin.Plugin.MixFollower.dll
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/bin/Debug/net8.0/Jellyfin.Plugin.MixFollower.pdb
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/Jellyfin.Plugin.MixFollower.dll
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/refint/Jellyfin.Plugin.MixFollower.dll
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/Jellyfin.Plugin.MixFollower.pdb
+/Users/sampling/Workspace/JellyfinMixFollower/Jellyfin.Plugin.MixFollower/obj/Debug/net8.0/ref/Jellyfin.Plugin.MixFollower.dll

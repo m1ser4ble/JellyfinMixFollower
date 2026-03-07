@@ -82,7 +82,7 @@ namespace Jellyfin.Plugin.MixFollower
         /// <returns>IEnumerable{BaseTaskTrigger}.</returns>
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {
-            this.logger.LogInformation("PlaylistRebuild GetDefaultTriggers");
+
             return new[]
             {
                 new TaskTriggerInfo { Type = TaskTriggerInfo.TriggerStartup },
@@ -106,50 +106,29 @@ namespace Jellyfin.Plugin.MixFollower
         {
             if (user is null)
             {
-                logger.LogInformation("user is not specified");
-                return null;
-            }
-            if (!IsLastfmPluginInstalled())
-            {
                 return null;
             }
 
             var plugin = pluginManager.GetPlugin(this.LASTFM_GUID);
-            if (plugin is null)
+            if (plugin is null || user is null)
             {
-                logger.LogInformation("user {Username} does not link with lastfm", user.Username);
                 return null;
             }
-            var plugin_assembly = plugin.Instance.GetType().Assembly;
-            //plugin_assembly.GetTypes().ToList().ForEach(type => logger.LogInformation("instance has {Type}", type));
-            //var dll = plugin.DllFiles.FirstOrDefault();
-            //var direct_assembly = Assembly.LoadFile(dll);
+            var plugin_assembly = plugin.Instance?.GetType().Assembly;
 
+            var obj = plugin_assembly?.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
 
-            //var obj = direct_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
-            var obj = plugin_assembly.GetType("Jellyfin.Plugin.Lastfm.Utils.UserHelpers");
-
-            var method = obj
-            .GetMethod("GetUser", new Type[] { typeof(User) });
-            if (method is null)
-            {
-                logger.LogInformation("method is null");
-            }
-            var x = obj
+            var lastfm_user = obj
             .GetMethod("GetUser", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy, new Type[] { typeof(User) })
             .Invoke(null, new object[] { user });
 
-            if (x is null)
+            if (lastfm_user is null)
             {
                 logger.LogInformation("getUser of {Username} result is null", user.Username);
                 return null;
             }
-            x.GetType().GetProperties().ToList().ForEach(property => logger.LogInformation("property : {P}", property.Name));
-            if (x.GetType().GetProperty("Username").GetValue(x) is null)
-            {
-                logger.LogInformation("cant get value ");
-            }
-            string? username = x.GetType().GetProperty("Username").GetValue(x).ToString();
+
+            string? username = lastfm_user.GetType().GetProperty("Username")?.GetValue(lastfm_user)?.ToString();
             this.logger.LogInformation("to {aa} , linked lastfm username is {Username}", user.Username, username);
             return username;
 
@@ -166,8 +145,6 @@ namespace Jellyfin.Plugin.MixFollower
             var artist = string.Join(" ", artists_name_list);
             mixfollower_entry.Add("title", name);
             mixfollower_entry.Add("artist", artist);
-            logger.LogInformation("each entry made by {Name} , {Artist}", name, artist);
-            logger.LogInformation("produced entry : {Entry}", mixfollower_entry.ToString());
             return mixfollower_entry;
 
         }
@@ -178,7 +155,6 @@ namespace Jellyfin.Plugin.MixFollower
             var url = $"https://www.last.fm/player/station/user/{username}/recommended";
             HttpClient client = new HttpClient();
             var response = await client.GetAsync(url).ConfigureAwait(false);
-            this.logger.LogInformation("returned msg : \n {Msg} ", response.Content);
             var data = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var mixfollower_formatted_data = new JObject();
             var lastfm_jobject = JObject.Parse(data);
@@ -192,7 +168,7 @@ namespace Jellyfin.Plugin.MixFollower
             .ForEach(mixfollower_entry => songlist.Add(mixfollower_entry));
 
             mixfollower_formatted_data.Add("songs", songlist);
-            this.logger.LogInformation("formatted data: \n {Data}", mixfollower_formatted_data.ToString());
+
             return mixfollower_formatted_data;
 
         }
@@ -212,7 +188,7 @@ namespace Jellyfin.Plugin.MixFollower
             .ToList()
             .ForEach(async usermap =>
             {
-                var mix = await GetRecommendedMixFromLastfmUser(usermap.LastfmUser).ConfigureAwait(false);
+                var mix = await GetRecommendedMixFromLastfmUser(usermap.LastfmUser!).ConfigureAwait(false);
                 await playlistHelper.CreateUserPlaylist(mix, usermap.MediaBrowserUser, false).ConfigureAwait(false);
             });
 
